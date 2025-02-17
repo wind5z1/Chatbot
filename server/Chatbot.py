@@ -11,7 +11,7 @@ def check_for_app_command(user_input):
     tokens = word_tokenize(user_input.lower())
     pos_tags = pos_tag(tokens)
     for token, tag in pos_tags:
-        if tag == 'NN' and token in ['calculator', 'notepad', 'chrome', 'github']:  # ✅ 修正條件判斷
+        if tag == 'NN' and token in ['calculator', 'notepad']:  # ✅ 修正條件判斷
             return token
     return None
 
@@ -20,10 +20,6 @@ def open_app(app_name):
         subprocess.Popen(['calc.exe'])
     elif app_name == 'notepad':
         subprocess.Popen(['notepad.exe'])
-    elif app_name == 'chrome':
-        subprocess.Popen([r'C:\Program Files\Google\Chrome\Application\chrome.exe'])
-    elif app_name == 'github':
-        subprocess.Popen([r'C:\Users\Jason\AppData\Local\GitHubDesktop\GitHubDesktop.exe'])
     else:
         print(f"Unknown app: {app_name}")
 
