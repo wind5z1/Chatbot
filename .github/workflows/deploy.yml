@@ -1,0 +1,13 @@
+name: Deploy to Heroku
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/Chatbot.git main
