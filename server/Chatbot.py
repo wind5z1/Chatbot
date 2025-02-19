@@ -37,7 +37,7 @@ def generate_response(user_input):
         help_intents = ["help", "what can you do", "what can you help with"]
         favorites = ["favourite", "love", "like"]
 
-        if any(token in greetings for token in tokens):
+        if any(intent in user_sentences for intent in greetings):
             return "Hello! How can I assist you today?"
         elif any(token in farewells for token in tokens):
             return "Goodbye! Have a nice day!"
