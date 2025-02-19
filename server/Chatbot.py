@@ -23,16 +23,21 @@ def open_app(app_name):
     else:
         print(f"Unknown app: {app_name}")
 
+def preprocess_text(text):
+    text = text.lower()
+    text = text.replace("what's", "what is")
+    return text
+
 def generate_response(user_input):
     try:
         app_command = check_for_app_command(user_input)
         if app_command:
             open_app(app_command)
             return f"Opening {app_command}..."
-        
+        user_input = preprocess_text(user_input)    
         tokens = word_tokenize(user_input.lower())
         user_sentences = " ".join(tokens)
-        greetings = ["hello", "hi", "hey", "how are you", "what's up"]
+        greetings = ["hello", "hi", "hey", "how are you", "what is up"]
         farewells = ["goodbye", "bye", "see you later"]
         help_intents = ["help", "what can you do", "what can you help with"]
         favorites = ["favourite", "love", "like"]
