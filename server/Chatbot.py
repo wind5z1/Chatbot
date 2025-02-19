@@ -4,7 +4,7 @@ from nltk.tokenize import word_tokenize
 from nltk import pos_tag
 
 # 下載 NLTK 必需的資料
-nltk.download('punkt')
+nltk.download('punkt_tab')
 nltk.download('averaged_perceptron_tagger_eng')
 
 def check_for_app_command(user_input):
