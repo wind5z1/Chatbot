@@ -4,8 +4,8 @@ from nltk.tokenize import word_tokenize
 from nltk import pos_tag
 
 # 下載 NLTK 必需的資料
-nltk.download('punkt_tab')
-nltk.download('averaged_perceptron_tagger_eng')
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 
 def check_for_app_command(user_input):
     tokens = word_tokenize(user_input.lower())
@@ -17,9 +17,9 @@ def check_for_app_command(user_input):
 
 def open_app(app_name):
     if app_name == 'calculator':
-        subprocess.Popen(['calc.exe'])
+        subprocess.run(['calc'], shell=True)
     elif app_name == 'notepad':
-        subprocess.Popen(['notepad.exe'])
+        subprocess.Popen(['notepad'], shell=True)
     else:
         print(f"Unknown app: {app_name}")
 
@@ -44,6 +44,7 @@ def generate_response(user_input):
             return "I can chat with you in simple conversations. You can ask me anything!"
         elif any(token in favorites for token in tokens):
             return "I like to chat with you!"
+        return "I'm not sure how to respond that."
     except Exception as e:
         print(f"Error in generate response: {e}")
         return "Sorry, I couldn't understand you. Can you please rephrase your question?"
