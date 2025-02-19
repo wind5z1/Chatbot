@@ -4,7 +4,7 @@ from nltk.tokenize import word_tokenize
 from nltk import pos_tag
 
 # 下載 NLTK 必需的資料
-nltk.download('punkt_tab')
+nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger_eng')
 
 def check_for_app_command(user_input):
@@ -41,7 +41,7 @@ def generate_response(user_input):
             return "Hello! How can I assist you today?"
         elif any(token in farewells for token in tokens):
             return "Goodbye! Have a nice day!"
-        elif any(user_sentences in help_intents in tokens):
+        elif any(intent in user_sentences for intent in help_intents):
             return "I can chat with you in simple conversations. You can ask me anything!"
         elif any(token in favorites for token in tokens):
             return "I like to chat with you!"
