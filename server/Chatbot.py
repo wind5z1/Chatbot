@@ -4,8 +4,8 @@ from nltk.tokenize import word_tokenize
 from nltk import pos_tag
 
 # 下載 NLTK 必需的資料
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
+nltk.download('punkt_tab')
+nltk.download('averaged_perceptron_tagger_en')
 
 def check_for_app_command(user_input):
     tokens = word_tokenize(user_input.lower())
@@ -19,7 +19,7 @@ def open_app(app_name):
     if app_name == 'calculator':
         subprocess.run(['calc'], shell=True)
     elif app_name == 'notepad':
-        subprocess.Popen(['notepad'], shell=True)
+        subprocess.run(['notepad'], shell=True)
     else:
         print(f"Unknown app: {app_name}")
 
