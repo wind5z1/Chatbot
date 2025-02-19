@@ -1,11 +1,15 @@
 import subprocess
 import nltk
+import contractions
 from nltk.tokenize import word_tokenize
 from nltk import pos_tag
 
 # 下載 NLTK 必需的資料
 nltk.download('punkt_tab')
 nltk.download('averaged_perceptron_tagger_eng')
+
+def expand_contractions(text):
+    return contractions.fix(text)
 
 def check_for_app_command(user_input):
     tokens = word_tokenize(user_input.lower())
@@ -23,18 +27,13 @@ def open_app(app_name):
     else:
         print(f"Unknown app: {app_name}")
 
-def preprocess_text(text):
-    text = text.lower()
-    text = text.replace("what's", "what is")
-    return text
-
 def generate_response(user_input):
     try:
         app_command = check_for_app_command(user_input)
         if app_command:
             open_app(app_command)
             return f"Opening {app_command}..."
-        user_input = preprocess_text(user_input)    
+        expanded_input = expand_contractions(user_input.lower()) 
         tokens = word_tokenize(user_input.lower())
         user_sentences = " ".join(tokens)
         greetings = ["hello", "hi", "hey", "how are you", "what is up"]
