@@ -42,7 +42,7 @@ def generate_response(user_input):
             return "Hello! How can I assist you today?"
         elif any(token in farewells for token in tokens):
             return "Goodbye! Have a nice day!"
-        elif user_sentences in help_intents:
+        elif any(user_sentences for help in help_intents):
             return "I can chat with you in simple conversations. You can ask me anything!"
         elif any(token in favorites for token in tokens):
             return "I like to chat with you!"
