@@ -32,34 +32,41 @@
     <div id="chatOutput"></div>
     <input type="text" id="input" placeholder="Enter your message">
     <button onclick="sendMessage()">Send</button>
+    
     <script>
-    async function sendMessage() {
+        // 確保前端和後端 API 路徑適用於本機 & 部署環境
+        const API_BASE_URL = window.location.origin.includes("localhost") 
+            ? "http://localhost:5000" 
+            : window.location.origin;
+
+        async function sendMessage() {
             const input = document.getElementById("input");
             const message = input.value.trim();
             if (!message) return;
 
             const output = document.getElementById("chatOutput");
-            output.textContent += `You: ${message}\n`;
+            output.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
 
-        try {
-            const response = await fetch('http://localhost:5000/api', {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json'
-                },
+            try {
+                const response = await fetch(`${API_BASE_URL}/api`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message })
-            });
+                });
+
                 const data = await response.json();
-                output.textContent += `Bot: ${data.response}\n\n`;
-        } catch (error) {
+                output.innerHTML += `<p><strong>Bot:</strong> ${data.response}</p>`;
+            } catch (error) {
                 console.error(error);
-                output.textContent += "Bot: Sorry, something went wrong.\n\n";
+                output.innerHTML += `<p><strong>Bot:</strong> Sorry, something went wrong.</p>`;
+            }
+
+            input.value = ""; // 清空輸入框
+            input.focus(); // 聚焦輸入框
+            output.scrollTop = output.scrollHeight; // 滾動到底部
         }
 
-            input.value = ""; // Clear input
-            input.focus(); // Focus input for next message
-            output.scrollTop = output.scrollHeight; // Scroll to bottom
-        }
+        // 按 Enter 送出訊息
         document.getElementById("input").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
