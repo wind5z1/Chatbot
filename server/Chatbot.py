@@ -31,8 +31,6 @@ def generate_response(user_input):
             return f"Opening {app_command}..."
         
         tokens = word_tokenize(user_input.lower())
-        user_sentences = " ".join(tokens)
-
         greetings = ["hello", "hi", "hey", "how are you", "what's up"]
         farewells = ["goodbye", "bye", "see you later"]
         help_intents = ["help", "what can you do", "what can you help with"]
@@ -42,7 +40,7 @@ def generate_response(user_input):
             return "Hello! How can I assist you today?"
         elif any(token in farewells for token in tokens):
             return "Goodbye! Have a nice day!"
-        elif any(user_sentences for help in help_intents):
+        elif any(token in help_intents for token in tokens):
             return "I can chat with you in simple conversations. You can ask me anything!"
         elif any(token in favorites for token in tokens):
             return "I like to chat with you!"
