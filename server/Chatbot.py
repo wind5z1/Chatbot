@@ -34,7 +34,7 @@ def generate_response(user_input):
             open_app(app_command)
             return f"Opening {app_command}..."
         expanded_input = expand_contractions(user_input.lower()) 
-        tokens = word_tokenize(user_input.lower())
+        tokens = word_tokenize(expanded_input)
         user_sentences = " ".join(tokens)
         greetings = ["hello", "hi", "hey", "how are you", "what is up"]
         farewells = ["goodbye", "bye", "see you later"]
