@@ -64,8 +64,8 @@ def open_app(app_name):
 def calculate_expression(expression):
     try:
         expression = expression.replace(" ", " ")
-        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) + "/100",expression))
-        if not re.match(r'^[\d+\-*/().% sqrt sincostanlog]+$', expression):
+        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) + "/100"), expression)
+        if not re.match(r'^[\d+\-*/().% a-zA-Z]+$', expression): 
             return "Invalid expression,Please try again."
         result = eval(expression, {"__builtins__": None}, {**operators, **math_functions})
         return f"The result is: {result}"
@@ -107,7 +107,8 @@ def generate_response(user_input):
             else:
                 return "Please provide a city name."
         
-        if any (op in user_input for op in operators.keys()):
+        if any(char in user_input for char in "0123456789+-*/^%") or \
+            any(func in user_input.lower() for func in ["sqrt", "sin", "cos", "tan", "log"]):
             expression = re.sub(r'[^0-9+\-*/().% ]', '', user_input)
             if expression:
                 return calculate_expression(expression)
