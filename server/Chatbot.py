@@ -64,7 +64,7 @@ def open_app(app_name):
 def calculate_expression(expression):
     try:
         expression = expression.replace(" ", " ")
-        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) + "/100"), expression)
+        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) + "/100",expression))
         if not re.match(r'^[\d+\-*/().% sqrt sincostanlog]+$', expression):
             return "Invalid expression,Please try again."
         result = eval(expression, {"__builtins__": None}, {**operators, **math_functions})
