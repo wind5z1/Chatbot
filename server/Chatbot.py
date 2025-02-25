@@ -45,10 +45,18 @@ def open_app(app_name):
 def get_weather(city):
     api_key = "5dac3b051c407fc1fcc3b4d8e6043446"
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        temperature = data["main"]["temp"]
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            temperature_kelvin = data["main"]["temp"]
+            temperature_celsius = temperature_kelvin - 273.15
+            weather_description = data["weather"][0]["description"]
+            return f"The temperature in {city} is {weather_description} with a temperature of {temperature_celsius:.1f}°C."
+        else:
+            return "Are you sure you living in earth?"
+    except  Exception as e:
+        return "An error occurred while fetching weather data."
 
 def generate_response(user_input):
     try:
@@ -56,6 +64,16 @@ def generate_response(user_input):
         if app_command:
             open_app(app_command)
             return f"Opening {app_command}..."
+        weather_keyword =  ["weather", "temperature"]
+        if any(keyword in user_input.lower() for keyword in weather_keyword):
+            doc = nlp(user_input.lower())
+            cities = [ent.text for ent in doc.ents if ent.label_ == "GPE"]
+            if cities:
+                city = cities[0]
+                weather_info = get_weather(city)
+                return weather_info
+            else:
+                return "Please provide a city name."
         
         tokens = preprocess_text(user_input)
         user_sentences = " ".join(tokens)
