@@ -49,19 +49,20 @@ def generate_response(user_input):
             return f"Opening {app_command}..."
         
         tokens = preprocess_text(user_input)
-        
+        user_sentences = " ".join(tokens)
+
         greetings = ["hello", "hi", "hey"]
         farewells = ["goodbye", "bye", "see you later"]
-        help_intents = ["help", "do"]
+        help_intents = ["help", "what can you do"]
         favorites = ["favourite", "love", "like"]
 
-        if any(token in greetings for token in tokens):
+        if any(greeting in user_sentences for greeting in greetings):
             return "Hello! How can I assist you today?"
-        elif any(token in farewells for token in tokens):
+        elif any(farewell in user_sentences for farewell in farewells):
             return "Goodbye! Have a nice day!"
-        elif any(token in help_intents for token in tokens):
+        elif any(help_intent in user_sentences for help_intent in help_intents):
             return "I can chat with you in simple conversations. You can ask me anything!"
-        elif any(token in favorites for token in tokens):
+        elif any(favourite in user_sentences for favourite in favorites):
             return "I like to chat with you!"
         return "I'm not sure how to respond to that."
     
