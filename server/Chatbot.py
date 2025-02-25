@@ -27,9 +27,6 @@ math_functions = {
     "exp" : math.exp
 }
 
-operators = {"+": lambda x, y: x + y, "-": lambda x, y: x - y, "*": lambda x, y: x * y, "/": lambda x, y: x / y}
-math_functions = {}
-
 def preprocess_text(text):
     text = contractions.fix(text)
     doc = nlp(text.lower())
@@ -69,22 +66,16 @@ def calculate_expression(expression):
     try:
         expression = expression.replace(" ", "")  # 去掉所有空格
 
-        # 處理百分比，例如 "20%" -> "0.2"
-        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) / 100), expression)
-
-        # 處理 "20% of 200" -> "0.2 * 200"
-        expression = re.sub(r'(\d+)%\s*of', lambda m: f"({float(m.group(1)) / 100}) *", expression)
-
-        # 確保只有合法字符
-        if not re.match(r'^[\d+\-*/().% ]+$', expression): 
-            return "Invalid expression, please try again."
+        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) + "/100", expression))
+        
+        if not re.match(r'^[\d+\-*/().% sqrt sincostanlog]+$', expression):
+            return "Invalid expression. Please enter a valid mathematical expression."
 
         # 使用 eval 進行計算
         result = eval(expression, {"__builtins__": None}, {**operators, **math_functions})
         return f"The result is: {result}"
-    
     except ZeroDivisionError:
-        return "Cannot divide by zero"
+        return "Error: Division by zero."
     except Exception as e:
         return f"Error calculating expression: {str(e)}"
     
