@@ -3,9 +3,19 @@ import contractions
 import spacy
 import platform
 import requests
+import re
+import ast
+import operator as op
 
 # 下載 NLTK 必需的資料
 nlp = spacy.load("en_core_web_sm")
+
+operators ={
+    "+" : op.add,
+    "-" : op.sub,
+    "*" : op.mul,
+    "/" : op.truediv
+}
 
 def preprocess_text(text):
     text = contractions.fix(text)
@@ -41,7 +51,16 @@ def open_app(app_name):
             subprocess.run(["gedit"])
     else:
         print(f"Unsupported OS: {system}")
-
+def calculate_expression(expression):
+    try:
+        expression = expression.replace(" ", " ")
+        if not re.match(r'^\d+(\.\d+)?\s*[+\-*/]\s*\d+(\.\d+)?$', expression):
+            return "Invalid expression,Please try again."
+        result = eval(expression, {__builtins__: None},operators)
+        return f"The result is: {result}"
+    except Exception as e:
+        return f"Error calculating expression: {str(e)}"
+    
 def get_weather(city):
     api_key = "5dac3b051c407fc1fcc3b4d8e6043446"
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}"
@@ -74,6 +93,13 @@ def generate_response(user_input):
                 return weather_info
             else:
                 return "Please provide a city name."
+        
+        if "calculate" in user_input.lower() or any (op in user_input.lower() for op in operators.keys()):
+            expression = re.sub(r'[^0-9+\-*/(). ]', ' ', user_input)
+            if expression:
+                return calculate_expression(expression)
+            else:
+                return "Please provide a valid mathematical expression."
         
         tokens = preprocess_text(user_input)
         user_sentences = " ".join(tokens)
