@@ -27,6 +27,9 @@ math_functions = {
     "exp" : math.exp
 }
 
+operators = {"+": lambda x, y: x + y, "-": lambda x, y: x - y, "*": lambda x, y: x * y, "/": lambda x, y: x / y}
+math_functions = {}
+
 def preprocess_text(text):
     text = contractions.fix(text)
     doc = nlp(text.lower())
@@ -63,12 +66,22 @@ def open_app(app_name):
         print(f"Unsupported OS: {system}")
 def calculate_expression(expression):
     try:
-        expression = expression.replace(" ", " ")
-        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) + "/100"), expression)
-        if not re.match(r'^[\d+\-*/().% a-zA-Z]+$', expression): 
-            return "Invalid expression,Please try again."
+        expression = expression.replace(" ", "")  # 去掉所有空格
+
+        # 處理百分比，例如 "20%" -> "0.2"
+        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) / 100), expression)
+
+        # 處理 "20% of 200" -> "0.2 * 200"
+        expression = re.sub(r'(\d+)%\s*of', lambda m: f"({float(m.group(1)) / 100}) *", expression)
+
+        # 確保只有合法字符
+        if not re.match(r'^[\d+\-*/().% ]+$', expression): 
+            return "Invalid expression, please try again."
+
+        # 使用 eval 進行計算
         result = eval(expression, {"__builtins__": None}, {**operators, **math_functions})
         return f"The result is: {result}"
+    
     except ZeroDivisionError:
         return "Cannot divide by zero"
     except Exception as e:
