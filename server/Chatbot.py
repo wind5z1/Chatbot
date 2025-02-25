@@ -1,31 +1,45 @@
 import subprocess
-import nltk
 import contractions
-from nltk.tokenize import word_tokenize
-from nltk import pos_tag
+import spacy
+import platform
 
 # 下載 NLTK 必需的資料
-nltk.download('punkt_tab')
-nltk.download('averaged_perceptron_tagger_eng')
+nlp = spacy.load("en_core_web_sm")
 
-def expand_contractions(text):
-    return contractions.fix(text)
+def preprocess_text(text):
+    text = contractions.fix(text)
+    doc = nlp(text.lower())
+
+    tokens = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
+    return tokens
 
 def check_for_app_command(user_input):
-    tokens = word_tokenize(user_input.lower())
-    pos_tags = pos_tag(tokens)
-    for token, tag in pos_tags:
-        if tag == 'NN' and token in ['calculator', 'notepad']:  # ✅ 修正條件判斷
-            return token
+    doc = nlp(user_input.lower())
+    for token in doc:
+        if token.pos_ == 'NOUN' and token.text in ['calculator', 'notepad']:  # ✅ 修正
+            return token.text
     return None
 
 def open_app(app_name):
-    if app_name == 'calculator':
-        subprocess.run(['calc'], shell=True)
-    elif app_name == 'notepad':
-        subprocess.run(['notepad'], shell=True)
+    system = platform.system()
+    
+    if system == "Windows":
+        if app_name == "calculator":
+            subprocess.run(["calc"], shell=True)
+        elif app_name == "notepad":
+            subprocess.run(["notepad"], shell=True)
+    elif system == "Darwin":  # macOS
+        if app_name == "calculator":
+            subprocess.run(["open", "-a", "Calculator"])
+        elif app_name == "notepad":
+            subprocess.run(["open", "-a", "TextEdit"])
+    elif system == "Linux":
+        if app_name == "calculator":
+            subprocess.run(["gnome-calculator"])
+        elif app_name == "notepad":
+            subprocess.run(["gedit"])
     else:
-        print(f"Unknown app: {app_name}")
+        print(f"Unsupported OS: {system}")
 
 def generate_response(user_input):
     try:
@@ -33,27 +47,26 @@ def generate_response(user_input):
         if app_command:
             open_app(app_command)
             return f"Opening {app_command}..."
-        expanded_input = expand_contractions(user_input.lower()) 
-        tokens = word_tokenize(expanded_input)
-        user_sentences = " ".join(tokens)
-        greetings = ["hello", "hi", "hey", "how are you", "what is up"]
-        farewells = ["goodbye", "bye", "see you later"]
-        help_intents = ["help", "what can you do", "what can you help with"]
+        
+        tokens = preprocess_text(user_input)
+        
+        greetings = ["hello", "hi", "hey", "how", "what"]
+        farewells = ["goodbye", "bye", "see"]
+        help_intents = ["help", "do", "can"]
         favorites = ["favourite", "love", "like"]
 
-        if any(intent in user_sentences for intent in greetings):
+        if any(token in greetings for token in tokens):
             return "Hello! How can I assist you today?"
         elif any(token in farewells for token in tokens):
             return "Goodbye! Have a nice day!"
-        elif any(intent in user_sentences for intent in help_intents):
+        elif any(token in help_intents for token in tokens):
             return "I can chat with you in simple conversations. You can ask me anything!"
         elif any(token in favorites for token in tokens):
             return "I like to chat with you!"
-        return "I'm not sure how to respond that."
+        return "I'm not sure how to respond to that."
+    
     except Exception as e:
-        print(f"Error in generate response: {e}")
-        return "Sorry, I couldn't understand you. Can you please rephrase your question?"
-
-
-
-
+        import traceback
+        print(f"Error in generate_response: {e}")
+        traceback.print_exc()
+        return "Sorry, an error occurred while processing your request."
