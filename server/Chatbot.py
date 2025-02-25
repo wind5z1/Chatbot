@@ -2,6 +2,7 @@ import subprocess
 import contractions
 import spacy
 import platform
+import requests
 
 # 下載 NLTK 必需的資料
 nlp = spacy.load("en_core_web_sm")
@@ -41,6 +42,14 @@ def open_app(app_name):
     else:
         print(f"Unsupported OS: {system}")
 
+def get_weather(city):
+    api_key = "5dac3b051c407fc1fcc3b4d8e6043446"
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        temperature = data["main"]["temp"]
+
 def generate_response(user_input):
     try:
         app_command = check_for_app_command(user_input)
@@ -58,9 +67,9 @@ def generate_response(user_input):
 
         if any(greeting in user_sentences for greeting in greetings):
             return "Hello! How can I assist you today?"
-        elif any(farewell in user_sentences for farewell in farewells):
+        elif any(farewell in user_input.lower() for farewell in farewells):
             return "Goodbye! Have a nice day!"
-        elif any(help_intent in user_sentences for help_intent in help_intents):
+        elif any(help_intent in user_input.lower() for help_intent in help_intents):
             return "I can chat with you in simple conversations. You can ask me anything!"
         elif any(favourite in user_sentences for favourite in favorites):
             return "I like to chat with you!"
