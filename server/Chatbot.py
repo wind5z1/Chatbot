@@ -10,7 +10,7 @@ def preprocess_text(text):
     text = contractions.fix(text)
     doc = nlp(text.lower())
 
-    tokens = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
+    tokens = [token.text for token in doc if not token.is_stop and token.is_alpha]
     return tokens
 
 def check_for_app_command(user_input):
