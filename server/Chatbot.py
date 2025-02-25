@@ -4,7 +4,7 @@ import spacy
 import platform
 import requests
 import re
-import ast
+import math
 import operator as op
 
 # 下載 NLTK 必需的資料
@@ -14,7 +14,17 @@ operators ={
     "+" : op.add,
     "-" : op.sub,
     "*" : op.mul,
-    "/" : op.truediv
+    "/" : op.truediv,
+    "**" : op.pow
+}
+math_functions = {
+    "sin" : math.sin,
+    "cos" : math.cos,
+    "tan" : math.tan,
+    "sqrt" : math.sqrt,
+    "log" : math.log,
+    "log10" : math.log10,
+    "exp" : math.exp
 }
 
 def preprocess_text(text):
@@ -54,10 +64,13 @@ def open_app(app_name):
 def calculate_expression(expression):
     try:
         expression = expression.replace(" ", " ")
-        if not re.match(r'^\d+(\.\d+)?\s*[+\-*/]\s*\d+(\.\d+)?$', expression):
+        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) + "/100"), expression)
+        if not re.match(r'^[\d+\-*/().% sqrt sincostanlog]+$', expression):
             return "Invalid expression,Please try again."
-        result = eval(expression, {"__builtins__": None},operators)
+        result = eval(expression, {"__builtins__": None}, {**operators, **math_functions})
         return f"The result is: {result}"
+    except ZeroDivisionError:
+        return "Cannot divide by zero"
     except Exception as e:
         return f"Error calculating expression: {str(e)}"
     
