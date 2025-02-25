@@ -68,8 +68,6 @@ def calculate_expression(expression):
     try:
         expression = expression.replace(" ", "")  # 去掉所有空格
 
-        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) / 100), expression)
-        
         expression = re.sub(r'(\d+)%\s*of', lambda m: f"({float(m.group(1)) / 100}) *", expression)
 
         # 確保只有合法字符
