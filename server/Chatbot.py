@@ -56,7 +56,7 @@ def calculate_expression(expression):
         expression = expression.replace(" ", " ")
         if not re.match(r'^\d+(\.\d+)?\s*[+\-*/]\s*\d+(\.\d+)?$', expression):
             return "Invalid expression,Please try again."
-        result = eval(expression, {__builtins__: None},operators)
+        result = eval(expression, {"__builtins__": None},operators)
         return f"The result is: {result}"
     except Exception as e:
         return f"Error calculating expression: {str(e)}"
