@@ -94,7 +94,7 @@ def generate_response(user_input):
             else:
                 return "Please provide a city name."
         
-        if "calculate" in user_input.lower() or any (op in user_input.lower() for op in operators.keys()):
+        if any (op in user_input.lower() for op in operators.keys()):
             expression = re.sub(r'[^0-9+\-*/(). ]', ' ', user_input)
             if expression:
                 return calculate_expression(expression)
