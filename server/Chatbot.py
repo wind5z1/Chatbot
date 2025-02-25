@@ -50,9 +50,9 @@ def generate_response(user_input):
         
         tokens = preprocess_text(user_input)
         
-        greetings = ["hello", "hi", "hey", "how", "what"]
-        farewells = ["goodbye", "bye", "see"]
-        help_intents = ["help", "do", "can"]
+        greetings = ["hello", "hi", "hey"]
+        farewells = ["goodbye", "bye", "see you later"]
+        help_intents = ["help", "do"]
         favorites = ["favourite", "love", "like"]
 
         if any(token in greetings for token in tokens):
