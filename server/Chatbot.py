@@ -145,7 +145,7 @@ def get_weather(city):
 def generate_response(user_input):
     global last_joke_requested
     try:
-        if "define" in user_input.lower():
+        if re.match(f"define\s+\w+" , user_input.lower()):
             word = user_input.lower().replace("define", "").strip()
             return get_defination(word)
 
