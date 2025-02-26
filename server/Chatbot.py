@@ -149,12 +149,14 @@ def generate_response(user_input):
             else:
                 return "Please provide a valid mathematical expression."
 
-        joke_keywords = ["joke", "funny", "tell me a joke"]
         next_joke_keywords = ["next", "next joke"]
-        if any(keyword in user_input.lower() for keyword in joke_keywords):
-            return get_joke()
         if last_joke_requested and any(keyword in  user_input.lower() for keyword in next_joke_keywords):
             return get_joke()
+        joke_keywords = ["joke", "funny", "tell me a joke"]
+        if any(keyword in user_input.lower() for keyword in joke_keywords):
+            last_joke_requested = True
+            return get_joke()
+        last_joke_requested = False
         
         tokens = preprocess_text(user_input)
         user_sentences = " ".join(tokens)
