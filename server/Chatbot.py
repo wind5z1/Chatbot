@@ -69,6 +69,9 @@ def calculate_expression(expression):
         # 將百分比轉換為小數
         expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) / 100), expression)
         
+        # 將 "of" 轉換為 "*"
+        expression = expression.replace("of", "*")
+        
         if not re.match(r'^[\d+\-*/().% sqrt sincostanlog]+$', expression):
             return "Invalid expression. Please enter a valid mathematical expression."
 
@@ -102,6 +105,17 @@ def generate_response(user_input):
         if app_command:
             open_app(app_command)
             return f"Opening {app_command}..."
+
+        if any(char in user_input for char in "0123456789+-*/^%") or \
+            any(func in user_input.lower() for func in ["sqrt", "sin", "cos", "tan", "log"]):
+            # 移除非數學相關的詞語
+            expression = re.sub(r'[^0-9+\-*/().% of]', '', user_input)
+            expression = expression.replace("of", "*")  # 將 "of" 轉換為 "*"
+            if expression:
+                return calculate_expression(expression)
+            else:
+                return "Please provide a valid mathematical expression."
+        
         weather_keyword =  ["weather", "temperature"]
         if any(keyword in user_input.lower() for keyword in weather_keyword):
             doc = nlp(user_input.lower())
