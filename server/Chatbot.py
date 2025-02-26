@@ -10,6 +10,7 @@ import operator as op
 # 下載 NLTK 必需的資料
 nlp = spacy.load("en_core_web_sm")
 
+last_joke_requested = False
 operators = {
     "+" : op.add,
     "-" : op.sub,
@@ -112,6 +113,7 @@ def get_weather(city):
         return "An error occurred while fetching weather data."
 
 def generate_response(user_input):
+    global last_joke_requested
     try:
         app_command = check_for_app_command(user_input)
         if app_command:
@@ -148,7 +150,10 @@ def generate_response(user_input):
                 return "Please provide a valid mathematical expression."
 
         joke_keywords = ["joke", "funny", "tell me a joke"]
+        next_joke_keywords = ["next", "next joke"]
         if any(keyword in user_input.lower() for keyword in joke_keywords):
+            return get_joke()
+        if last_joke_requested and any(keyword in  user_input.lower() for keyword in next_joke_keywords):
             return get_joke()
         
         tokens = preprocess_text(user_input)
