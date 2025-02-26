@@ -38,21 +38,21 @@ def preprocess_text(text):
     tokens = [token.text for token in doc if not token.is_stop and token.is_alpha]
     return tokens
 
-def get_defination(word):
+def get_definition(word):
     url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
     response = requests.get(url)
 
     if response.status_code == 200:
         data = response.json()
-        defination = data[0]['meanings'][0]['definations'][0]['defination']
-        return f"Defination of '{word}':{defination}"
+        definition = data[0]['meanings'][0]['definitions'][0]['definition']
+        return f"Defination of '{word}':{definition}"
     else:
         return f"Sorry,i couldn't find the defination of the word '{word}'"
 
 def translate_text(text, target_language):
     try:
         translated = translator.translate(text, src='auto',dest=target_language)
-        if translated and translate_text:
+        if translated and translated.text:
             return f"{translated.text}"
         else:
             return "I cannot translate the word.Please try again."
