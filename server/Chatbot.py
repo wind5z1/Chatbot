@@ -82,6 +82,18 @@ def calculate_expression(expression):
         return "Error: Division by zero."
     except Exception as e:
         return f"Error calculating expression: {str(e)}"
+
+def get_joke():
+    try:
+        url = "https://api.chucknorris.io/jokes/random"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            return data["value"]
+        else:
+            return "I didn't have any jokes at this moment.Let me think a bit..."
+    except Exception as e:
+        return "An error occurred while fetching a joke."
     
 def get_weather(city):
     api_key = "5dac3b051c407fc1fcc3b4d8e6043446"
@@ -134,6 +146,10 @@ def generate_response(user_input):
                 return calculate_expression(expression)
             else:
                 return "Please provide a valid mathematical expression."
+
+        joke_keywords = ["joke", "funny", "tell me a joke"]
+        if any(keyword in user_input.lower() for keyword in joke_keywords):
+            return get_joke()
         
         tokens = preprocess_text(user_input)
         user_sentences = " ".join(tokens)
