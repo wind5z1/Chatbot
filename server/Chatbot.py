@@ -6,6 +6,9 @@ import requests
 import re
 import math
 import operator as op
+from googletrans import Translator
+
+translator = Translator()
 
 # 下載 NLTK 必需的資料
 nlp = spacy.load("en_core_web_sm")
@@ -35,6 +38,20 @@ def preprocess_text(text):
     tokens = [token.text for token in doc if not token.is_stop and token.is_alpha]
     return tokens
 
+def get_defination(word):
+    url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        defination = data[0]['meaning'][0]['defination'][0]['definations']
+        return f"Defination of '{word}':{defination}"
+    else:
+        return f"Sorry,i couldn't find the defination of the word '{word}'"
+
+def translate_text(text, target_language):
+    translated = translator.translate(text, src='auto',dest=target_language)
+    return translated
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
@@ -115,6 +132,18 @@ def get_weather(city):
 def generate_response(user_input):
     global last_joke_requested
     try:
+        if "define" in user_input.lower():
+            word = user_input.lower().replace("define", "").strip()
+            return get_defination(word)
+
+        if "translate" in user_input.lower() and "to" in user_input.lower():
+            match = re.search(r"translate(.+?) to (\w+)", user_input.lower())
+            if match:
+                text, lang = match.groups()
+                return translate_text(text, lang)
+            else:
+                return "Please use the format: translate[your text]to [desired language]."
+
         app_command = check_for_app_command(user_input)
         if app_command:
             open_app(app_command)
