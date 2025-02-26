@@ -44,7 +44,7 @@ def get_defination(word):
 
     if response.status_code == 200:
         data = response.json()
-        defination = data[0]['meaning'][0]['definations'][0]['defination']
+        defination = data[0]['meanings'][0]['definations'][0]['defination']
         return f"Defination of '{word}':{defination}"
     else:
         return f"Sorry,i couldn't find the defination of the word '{word}'"
@@ -53,7 +53,7 @@ def translate_text(text, target_language):
     try:
         translated = translator.translate(text, src='auto',dest=target_language)
         if translated and translate_text:
-            return f"Translated text: {translated.text}"
+            return f"{translated.text}"
         else:
             return "I cannot translate the word.Please try again."
     except Exception as e:
