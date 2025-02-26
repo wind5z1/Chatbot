@@ -141,14 +141,6 @@ def generate_response(user_input):
             else:
                 return "Please provide a city name."
         
-        if any(char in user_input for char in "0123456789+-*/^%") or \
-            any(func in user_input.lower() for func in ["sqrt", "sin", "cos", "tan", "log"]):
-            expression = re.sub(r'[^0-9+\-*/().% ]', '', user_input)
-            if expression:
-                return calculate_expression(expression)
-            else:
-                return "Please provide a valid mathematical expression."
-
         next_joke_keywords = ["next", "next joke"]
         if last_joke_requested and any(keyword in  user_input.lower() for keyword in next_joke_keywords):
             return get_joke()
@@ -157,7 +149,7 @@ def generate_response(user_input):
             last_joke_requested = True
             return get_joke()
         last_joke_requested = False
-        
+
         tokens = preprocess_text(user_input)
         user_sentences = " ".join(tokens)
 
