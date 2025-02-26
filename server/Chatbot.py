@@ -38,26 +38,33 @@ def preprocess_text(text):
     tokens = [token.text for token in doc if not token.is_stop and token.is_alpha]
     return tokens
 
-def get_definition(word):
+def get_defination(word):
     url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
     response = requests.get(url)
 
     if response.status_code == 200:
-        data = response.json()
-        definition = data[0]['meanings'][0]['definitions'][0]['definition']
-        return f"Defination of '{word}':{definition}"
+        try:
+            data = response.json()
+            # 正確的 JSON 解析路徑
+            definition = data[0]['meanings'][0]['definitions'][0]['definition']
+            return f"Definition of '{word}': {definition}"
+        except (KeyError, IndexError) as e:
+            # 如果 JSON 結構不匹配或缺少字段
+            return f"Sorry, I couldn't find the definition of the word '{word}'."
     else:
-        return f"Sorry,i couldn't find the defination of the word '{word}'"
-
+        # 如果 API 請求失敗
+        return f"Sorry, I couldn't find the definition of the word '{word}'."
+    
 def translate_text(text, target_language):
     try:
-        translated = translator.translate(text, src='auto',dest=target_language)
+        translated = translator.translate(text, src='auto', dest=target_language)
         if translated and translated.text:
-            return f"{translated.text}"
+            return f"Translated text: {translated.text}"
         else:
-            return "I cannot translate the word.Please try again."
+            return "Translation failed. Please try again."
     except Exception as e:
-        return f"An error occured while trying to translate."
+        return f"An error occurred during translation: {str(e)}"
+    
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
@@ -143,12 +150,12 @@ def generate_response(user_input):
             return get_defination(word)
 
         if "translate" in user_input.lower() and "to" in user_input.lower():
-            match = re.search(r"translate(.+?) to (\w+)", user_input.lower())
+            match = re.search(r"translate (.+?) to (\w+)", user_input.lower())
             if match:
                 text, lang = match.groups()
-                return translate_text(text, lang)
+                return translate_text(text.strip(), lang.strip())
             else:
-                return "Please use the format: translate[your text]to [desired language]."
+                return "Please use the format: translate [your text] to [desired language]."
 
         app_command = check_for_app_command(user_input)
         if app_command:
