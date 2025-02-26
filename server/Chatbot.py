@@ -44,14 +44,20 @@ def get_defination(word):
 
     if response.status_code == 200:
         data = response.json()
-        defination = data[0]['meaning'][0]['defination'][0]['definations']
+        defination = data[0]['meaning'][0]['definations'][0]['defination']
         return f"Defination of '{word}':{defination}"
     else:
         return f"Sorry,i couldn't find the defination of the word '{word}'"
 
 def translate_text(text, target_language):
-    translated = translator.translate(text, src='auto',dest=target_language)
-    return translated
+    try:
+        translated = translator.translate(text, src='auto',dest=target_language)
+        if translated and translate_text:
+            return f"Translated text: {translated.text}"
+        else:
+            return "I cannot translate the word.Please try again."
+    except Exception as e:
+        return f"An error occured while trying to translate."
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
