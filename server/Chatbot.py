@@ -66,7 +66,8 @@ def calculate_expression(expression):
     try:
         expression = expression.replace(" ", "")  # 去掉所有空格
 
-        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) + "/100", expression))
+        # 將百分比轉換為小數
+        expression = re.sub(r'(\d+)%', lambda m: str(float(m.group(1)) / 100), expression)
         
         if not re.match(r'^[\d+\-*/().% sqrt sincostanlog]+$', expression):
             return "Invalid expression. Please enter a valid mathematical expression."
