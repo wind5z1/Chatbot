@@ -169,18 +169,21 @@ def generate_response(user_input):
                 last_definition_word = new_input
                 return get_definition(new_input)
             elif last_context == "translate":
-                last_translation_text = new_input
-                return translate_text(new_input, last_translation_lang)
-            else:
-                return "What you mean about {new_input}?"
-            
+                if last_translation_lang:
+                    last_translation_text = new_input
+                    return translate_text(new_input, last_translation_lang)
+                else:
+                    return "What you mean about {new_input}?"
+        else:
+            return "I'm not sure what you mean. Please ask me something else."
+
         if "next" in user_input.lower():
             if last_translation_lang and last_translation_text:
                 return translate_text(last_translation_text,last_translation_lang)
             elif last_definition_word:
                 return get_definition(last_definition_word)
             else:
-                return "What you mean about '{user_input}'?"
+                return f"What you mean about '{user_input}'?"
             
         define_match = re.search(r"define\s+(\w+)", user_input.lower())
         if define_match:
@@ -209,7 +212,10 @@ def generate_response(user_input):
                 return translate_text(user_input.strip(), last_translation_lang)
             else:
                 return "Please provide a valid text."
-            
+        last_translation_lang = None
+        last_translation_text = None
+        last_context = None
+        
         app_command = check_for_app_command(user_input)
         if app_command:
             open_app(app_command)
