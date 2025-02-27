@@ -6,9 +6,7 @@ import requests
 import re
 import math
 import operator as op
-from googletrans import Translator
-
-translator = Translator()
+from deep_translator import GoogleTranslator
 
 # 下載 NLTK 必需的資料
 nlp = spacy.load("en_core_web_sm")
@@ -71,9 +69,9 @@ def translate_text(text, target_language):
             "spanish" : "es"
         }
         target_language = language_map.get(target_language.lower(), target_language)
-        translated = translator.translate(text, src='auto', dest=target_language)
-        if translated and translated.text:
-            return f"Translated text: {translated.text}"
+        translated = GoogleTranslator(source='auto', target=target_language).translate(text)
+        if translated:
+            return f"Translated text: {translated}"
         else:
             return "Translation failed. Please try again."
     except Exception as e:
