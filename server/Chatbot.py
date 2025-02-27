@@ -174,8 +174,8 @@ def generate_response(user_input):
                     return translate_text(new_input, last_translation_lang)
                 else:
                     return "What you mean about {new_input}?"
-        else:
-            return "I'm not sure what you mean. Please ask me something else."
+            else:
+                return "I'm not sure what you mean. Please ask me something else."
 
         if "next" in user_input.lower():
             if last_translation_lang and last_translation_text:
@@ -191,9 +191,7 @@ def generate_response(user_input):
             last_definition_word = word
             last_context = "define"
             return get_definition(word)
-        else:
-            last_definition_word = None
-            last_context = None
+
         if "translate" in user_input.lower() and "to" in user_input.lower():
             match = re.search(r"translate (.+?) to (\w+)", user_input.lower())
             if match:
@@ -206,9 +204,6 @@ def generate_response(user_input):
                 else:
                     "Please provide both text and target language."
             else:
-                last_translation_lang = None
-                last_translation_text = None
-                last_context = None
                 return "Please use the format: translate [your text] to [desired language]."
 
         if last_translation_lang:
@@ -217,7 +212,10 @@ def generate_response(user_input):
                 return translate_text(user_input.strip(), last_translation_lang)
             else:
                 return "Please provide a valid text."
-
+        last_translation_lang = None
+        last_translation_text = None
+        last_context = None
+        
         app_command = check_for_app_command(user_input)
         if app_command:
             open_app(app_command)
