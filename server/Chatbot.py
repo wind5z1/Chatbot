@@ -12,6 +12,9 @@ from deep_translator import GoogleTranslator
 nlp = spacy.load("en_core_web_sm")
 
 last_joke_requested = False
+last_translation = None
+last_definition = None
+last_translation_lang = None
 
 operators = {
     "+" : op.add,
@@ -156,11 +159,20 @@ def get_weather(city):
         return "An error occurred while fetching weather data."
 
 def generate_response(user_input):
-    global last_joke_requested
+    global last_joke_requested, last_translation, last_definition, last_translation_lang
     try:
+        how_about_match = re.search(r"how about (.+)", user_input.lower())
+        if how_about_match:
+            new_query = how_about_match.group(1).strip()
+            if last_translation is not None:
+                return translate_text(new_query, last_translation_lang)
+            if last_definition is not None:
+                return get_definition(new_query)
+            return "Could you clarify what you mean by 'how about'?"
         define_match = re.search(r"define\s+(\w+)", user_input.lower())
         if define_match:
             word = define_match.group(1)
+            last_definition = word
             return get_definition(word)
 
         if "translate" in user_input.lower() and "to" in user_input.lower():
@@ -168,6 +180,8 @@ def generate_response(user_input):
             if match:
                 text, lang = match.groups()
                 if text.strip() and lang.strip():
+                    last_translation = text.strip()
+                    last_translation_lang = lang.strip()
                     return translate_text(text.strip(), lang.strip())
                 else:
                     "Please provide both text and target language."
