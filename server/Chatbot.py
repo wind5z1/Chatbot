@@ -38,7 +38,7 @@ def preprocess_text(text):
     tokens = [token.text for token in doc if not token.is_stop and token.is_alpha]
     return tokens
 
-def get_defination(word):
+def get_definition(word):
     url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
     response = requests.get(url)
 
@@ -145,9 +145,10 @@ def get_weather(city):
 def generate_response(user_input):
     global last_joke_requested
     try:
-        if re.match(f"define\s+\w+" , user_input.lower()):
-            word = user_input.lower().replace("define", "").strip()
-            return get_defination(word)
+        define_match = re.search(r"define\s+(\w+)", user_input.lower())
+        if define_match:
+            word = define_match.group(1)
+            return get_definition(word)
 
         if "translate" in user_input.lower() and "to" in user_input.lower():
             match = re.search(r"translate (.+?) to (\w+)", user_input.lower())
