@@ -57,6 +57,17 @@ def get_definition(word):
     
 def translate_text(text, target_language):
     try:
+        language_map = {
+            "chinese" : "zh-CN",
+            "english" : "en",
+            "french" : "fr",
+            "german" : "de",
+            "italian" : "it",
+            "japanese" : "ja",
+            "korean" : "ko",
+            "spanish" : "es"
+        }
+        target_language = language_map.get(target_language.lower(), target_language)
         translated = translator.translate(text, src='auto', dest=target_language)
         if translated and translated.text:
             return f"Translated text: {translated.text}"
