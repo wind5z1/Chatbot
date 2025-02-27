@@ -15,6 +15,7 @@ last_joke_requested = False
 last_translation_text = None
 last_translation_lang = None
 last_definition_word = None
+last_context = None
 
 operators = {
     "+" : op.add,
@@ -159,19 +160,33 @@ def get_weather(city):
         return "An error occurred while fetching weather data."
 
 def generate_response(user_input):
-    global last_joke_requested, last_definition_word, last_translation_text, last_translation_lang
+    global last_joke_requested, last_definition_word, last_translation_text, last_translation_lang,last_context
     try:
+        how_about_match = re.search(r"how about(.+?)\??", user_input.lower())
+        if how_about_match:
+            new_input = how_about_match.group(1).strip()
+            if last_context == "define":
+                last_definition_word = new_input
+                return get_definition(new_input)
+            elif last_context == "translate":
+                last_translation_text = new_input
+                return translate_text(new_input, last_translation_lang)
+            else:
+                return "What you mean about {new_input}?"
+            
         if "next" in user_input.lower():
             if last_translation_lang and last_translation_text:
                 return translate_text(last_translation_text,last_translation_lang)
             elif last_definition_word:
                 return get_definition(last_definition_word)
             else:
-                return "What you mean about {user_input}?"
+                return "What you mean about '{user_input}'?"
+            
         define_match = re.search(r"define\s+(\w+)", user_input.lower())
         if define_match:
             word = define_match.group(1)
             last_definition_word = word
+            last_context = "define"
             return get_definition(word)
 
         if "translate" in user_input.lower() and "to" in user_input.lower():
@@ -181,6 +196,7 @@ def generate_response(user_input):
                 if text.strip() and lang.strip():
                     last_translation_lang = text.strip()
                     last_translation_text = lang.strip()
+                    last_context = "translate"
                     return translate_text(text.strip(), lang.strip())
                 else:
                     "Please provide both text and target language."
