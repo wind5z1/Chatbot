@@ -57,6 +57,9 @@ def get_definition(word):
     
 def translate_text(text, target_language):
     try:
+        if not text.strip():
+            return "Please provide text to translate."
+        
         language_map = {
             "chinese" : "zh-CN",
             "english" : "en",
@@ -165,7 +168,10 @@ def generate_response(user_input):
             match = re.search(r"translate (.+?) to (\w+)", user_input.lower())
             if match:
                 text, lang = match.groups()
-                return translate_text(text.strip(), lang.strip())
+                if text.strip() and lang.strip():
+                    return translate_text(text.strip(), lang.strip())
+                else:
+                    "Please provide both text and target language."
             else:
                 return "Please use the format: translate [your text] to [desired language]."
 
