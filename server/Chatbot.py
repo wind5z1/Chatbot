@@ -119,10 +119,10 @@ def get_time_info(user_input):
         }
         if city in timeZone_map:
             timezone = pytz.timezone(timeZone_map[city])
-            now = datetime.datetime.now(timezone).strftime('%H:%M:%S')
-            return f"The current time in {city} is {now}."
+            now = datetime.datetime.now(timezone)
+            return f"The current time in {city} is {now.strftime('%H:%M:%S')}."
         return f"I'm not clear about the city you typed. Please try other city such as 'new york' or 'london'."
-
+    return "I'm not sure what are you asking about."
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
