@@ -8,6 +8,8 @@ import math
 import operator as op
 import datetime
 import pytz
+from timezonefinder import TimezoneFinder
+from geopy.geocoders import Nominatim
 from deep_translator import GoogleTranslator
 
 # 下載 NLTK 必需的資料
@@ -107,18 +109,15 @@ def get_time_info(user_input):
     timeZone_match = re.search(r"time in (\w+)", user_input.lower())
     if timeZone_match:
         city = timeZone_match.group(1).strip().lower()
-        timeZone_map = {
-            "new york" : "America/New_York",
-            "london" : "Europe/London",
-            "tokyo" : "Asia/Tokyo",
-            "sydney" : "Australia/Sydney",
-            "singapore" : "Asia/Singapore",
-            "hong kong" : "Asia/Hong_Kong",
-            "dubai" : "Asia/Dubai",
-            "china" : "Asia/Shanghai"
-        }
-        if city in timeZone_map:
-            timezone = pytz.timezone(timeZone_map[city])
+        geolocator = Nominatim(user_agent="geoapiExercises")
+        location = geolocator.geocode(city)
+        if location:
+            latitude =location.latitude
+            logtitude = location.longitude
+            tf = TimezoneFinder()
+            timezone_str = tf.timezone_at(lng=logtitude, lat=latitude)
+        if timezone_str:
+            timezone = pytz.timezone(timezone_str)
             now = datetime.datetime.now(timezone)
             return f"The current time in {city} is {now.strftime('%H:%M:%S')}."
         return f"I'm not clear about the city you typed. Please try other city such as 'new york' or 'london'."
