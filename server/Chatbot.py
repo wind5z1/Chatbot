@@ -101,7 +101,7 @@ def get_time_info(user_input):
             "halloween" : datetime.date(now.year, 10, 31)
         }
         if event in event_dates:
-            days_until = (event_dates[event] - now).days
+            days_until = (event_dates[event] - now.date()).days
             return f"There are {days_until} days until {event}."
         return "I'm not clear about the event you typed.Please try other event such as 'christmas' or 'new year'."
     timeZone_match = re.search(r"time in (\w+)", user_input.lower())
@@ -115,12 +115,12 @@ def get_time_info(user_input):
             "singapore" : "Asia/Singapore",
             "hong kong" : "Asia/Hong_Kong",
             "dubai" : "Asia/Dubai",
-            "china" : "Asia/China"
+            "china" : "Asia/Shanghai"
         }
         if city in timeZone_map:
             timezone = pytz.timezone(timeZone_map[city])
-            now = datetime.datetime.now(timezone).strftime('%H:%M %S')
-            return f"The current time in {city} is {now.strftime('%H:%M %S')}."
+            now = datetime.datetime.now(timezone).strftime('%H:%M:%S')
+            return f"The current time in {city} is {now}."
         return f"I'm not clear about the city you typed. Please try other city such as 'new york' or 'london'."
 
 def check_for_app_command(user_input):
@@ -206,7 +206,7 @@ def generate_response(user_input):
         time_response = get_time_info(user_input)
         if time_response:
             return time_response
-            
+
         how_about_match = re.search(r"how about (.+)", user_input.lower())
         if how_about_match:
             new_query = how_about_match.group(1).strip()
