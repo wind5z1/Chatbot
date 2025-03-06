@@ -6,6 +6,8 @@ import requests
 import re
 import math
 import operator as op
+import datatime
+import pytz
 from deep_translator import GoogleTranslator
 
 # 下載 NLTK 必需的資料
@@ -80,7 +82,47 @@ def translate_text(text, target_language):
             return "Translation failed. Please try again."
     except Exception as e:
         return f"An error occurred during translation: {str(e)}"
+
+def get_time_info(user_input):
+    now = datatime.datetime.now()
+
+    if 'time' in user_input.lower():
+        return f"The current time is {now.strftime('%H:%M %S')}."
+    if 'date' in user_input.lower():
+        return f"Today's date is {now.strftime('%Y-%m-%d')}."
     
+    date_match = re.search(r"how many days until(\w+)", user_input.lower())
+    if date_match:
+        event = date_match.group(1).strip().lower()
+        event_dates = {
+            "christmas" : datatime.date(now.year, 12, 25),
+            "new year" : datatime.date(now.year + 1, 1, 1),
+            "valentine's day" : datatime.date(now.year, 2, 14),
+            "halloween" : datatime.date(now.year, 10, 31)
+        }
+        if event in event_dates:
+            days_until = (event_dates[event] - now).days
+            return f"There are {days_until} days until {event}."
+        return "I'm not clear about the event you typed.Please try other event such as 'christmas' or 'new year'."
+    timeZone_match = re.search(r"time in (\w+)", user_input.lower())
+    if timeZone_match:
+        city = timeZone_match.group(1).strip().lower()
+        timeZone_map = {
+            "new york" : "America/New_York",
+            "london" : "Europe/London",
+            "tokyo" : "Asia/Tokyo",
+            "sydney" : "Australia/Sydney",
+            "singapore" : "Asia/Singapore",
+            "hong kong" : "Asia/Hong_Kong",
+            "dubai" : "Asia/Dubai",
+            "china" : "Asia/China"
+        }
+        if city in timeZone_map:
+            timezone = pytz.timezone(timeZone_map[city])
+            now = datatime.datetime.now(timezone)
+            return f"The current time in {city} is {now.strftime('%H:%M %S')}."
+        return f"I'm not clear about the city you typed. Please try other city such as 'new york' or 'london'."
+        
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
