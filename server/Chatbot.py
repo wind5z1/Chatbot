@@ -113,9 +113,9 @@ def get_time_info(user_input):
         location = geolocator.geocode(city)
         if location:
             latitude =location.latitude
-            logtitude = location.longitude
+            longitude = location.longitude
             tf = TimezoneFinder()
-            timezone_str = tf.timezone_at(lng=logtitude, lat=latitude)
+            timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
         if timezone_str:
             timezone = pytz.timezone(timezone_str)
             now = datetime.datetime.now(timezone)
