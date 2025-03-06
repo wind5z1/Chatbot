@@ -203,6 +203,10 @@ def get_weather(city):
 def generate_response(user_input):
     global last_joke_requested, last_translation, last_definition, last_translation_lang
     try:
+        time_response = get_time_info(user_input)
+        if time_response:
+            return time_response
+            
         how_about_match = re.search(r"how about (.+)", user_input.lower())
         if how_about_match:
             new_query = how_about_match.group(1).strip()
