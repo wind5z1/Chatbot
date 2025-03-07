@@ -89,11 +89,11 @@ def get_time_info(user_input):
     now = datetime.datetime.now()
 
     if 'time' in user_input.lower():
-        return f"The current time is {now.strftime('%H:%M %S')}."
+        return f"The current time is {now.strftime('%H:%M:%S')}."
     if 'date' in user_input.lower():
         return f"Today's date is {now.strftime('%Y-%m-%d')}."
     
-    date_match = re.search(r"how many days until(\w+)", user_input.lower())
+    date_match = re.search(r"how many days until(.+)", user_input.lower())
     if date_match:
         event = date_match.group(1).strip().lower()
         event_dates = {
@@ -106,11 +106,12 @@ def get_time_info(user_input):
             days_until = (event_dates[event] - now.date()).days
             return f"There are {days_until} days until {event}."
         return "I'm not clear about the event you typed.Please try other event such as 'christmas' or 'new year'."
-    timeZone_match = re.search(r"time in (\w+)", user_input.lower())
+    timeZone_match = re.search(r"time in (.+)", user_input.lower())
     if timeZone_match:
         city = timeZone_match.group(1).strip().lower()
         geolocator = Nominatim(user_agent="geoapiExercises")
         location = geolocator.geocode(city)
+        timezone_str = None
         if location:
             latitude =location.latitude
             longitude = location.longitude
@@ -120,7 +121,8 @@ def get_time_info(user_input):
             timezone = pytz.timezone(timezone_str)
             now = datetime.datetime.now(timezone)
             return f"The current time in {city} is {now.strftime('%H:%M:%S')}."
-        return f"I'm not clear about the city you typed. Please try other city such as 'new york' or 'london'."
+        else:
+            return f"I'm not clear about the city you typed. Please try other city such as 'new york' or 'london'."
     return "I'm not sure what are you asking about."
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
