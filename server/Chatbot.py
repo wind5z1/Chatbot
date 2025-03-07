@@ -92,39 +92,57 @@ def get_time_info(user_input):
         return f"The current time is {now.strftime('%H:%M:%S')}."
     if 'date' in user_input.lower():
         return f"Today's date is {now.strftime('%Y-%m-%d')}."
-    
-    date_match = re.search(r"how many days until(.+)", user_input.lower())
+
+    date_match = re.search(r"how many days until (.+)", user_input.lower())
     if date_match:
         event = date_match.group(1).strip().lower()
         event_dates = {
-            "christmas" : datetime.date(now.year, 12, 25),
-            "new year" : datetime.date(now.year + 1, 1, 1),
-            "valentine's day" : datetime.date(now.year, 2, 14),
-            "halloween" : datetime.date(now.year, 10, 31)
+            "christmas": datetime.date(now.year, 12, 25),
+            "new year": datetime.date(now.year + 1, 1, 1),
+            "valentine's day": datetime.date(now.year, 2, 14),
+            "halloween": datetime.date(now.year, 10, 31)
         }
         if event in event_dates:
             days_until = (event_dates[event] - now.date()).days
             return f"There are {days_until} days until {event}."
-        return "I'm not clear about the event you typed.Please try other event such as 'christmas' or 'new year'."
+        return "I'm not clear about the event you typed. Please try other events such as 'christmas' or 'new year'."
+
     timeZone_match = re.search(r"time in (.+)", user_input.lower())
     if timeZone_match:
         city = timeZone_match.group(1).strip().lower()
+        
+        # 映射國家名稱到主要城市
+        city_mapping = {
+            "japan": "Tokyo",
+            "china": "Shanghai",
+            "usa": "New York",
+            "united states": "New York",
+            "uk": "London",
+            "united kingdom": "London",
+            "france": "Paris",
+            "germany": "Berlin",
+            "australia": "Sydney",
+            "india": "New Delhi"
+        }
+        city = city_mapping.get(city, city)  # 如果找不到映射，使用原始輸入
+
         geolocator = Nominatim(user_agent="geoapiExercises")
         location = geolocator.geocode(city)
-        timezone_str = None
         if location:
-            latitude =location.latitude
+            latitude = location.latitude
             longitude = location.longitude
             tf = TimezoneFinder()
             timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
-        if timezone_str:
-            now_utc = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-            timezone = pytz.timezone(timezone_str)
-            now = datetime.datetime.now(timezone)
-            return f"The current time in {city} is {now.strftime('%H:%M:%S')}."
+            if timezone_str:
+                timezone = pytz.timezone(timezone_str)
+                now = datetime.datetime.now(timezone)
+                return f"The current time in {city} is {now.strftime('%H:%M:%S')}."
+            else:
+                return f"Could not determine the timezone for {city}."
         else:
-            return f"I'm not clear about the city you typed. Please try other city such as 'new york' or 'london'."
-    return "I'm not sure what are you asking about."
+            return f"Could not find the location for {city}."
+    return "I'm not sure what you're asking about."
+
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
