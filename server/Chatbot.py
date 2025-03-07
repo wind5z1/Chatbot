@@ -83,10 +83,12 @@ def translate_text(text, target_language):
     except Exception as e:
         return f"An error occurred during translation: {str(e)}"
 
+import requests
+import datetime
+
 def get_time_or_date(user_input):
     user_input = user_input.lower().strip()
 
-    # 支援的時區對應
     timezone_mapping = {
         "japan": "Asia/Tokyo",
         "new york": "America/New_York",
@@ -96,6 +98,20 @@ def get_time_or_date(user_input):
         "los angeles": "America/Los_Angeles"
     }
 
+    def fetch_time_data(timezone):
+        url = f"http://worldtimeapi.org/api/timezone/{timezone}"
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                datetime_str = data["datetime"]  # ISO 8601 格式
+                dt = datetime.datetime.fromisoformat(datetime_str[:-6])  # 去掉時區資訊
+                return dt
+            else:
+                return None
+        except:
+            return None
+
     if user_input == "time":
         now = datetime.datetime.now()
         return f"The current time is {now.strftime('%H:%M:%S')}."
@@ -103,17 +119,23 @@ def get_time_or_date(user_input):
     elif user_input == "date":
         today = datetime.date.today()
         return f"Today's date is {today.strftime('%Y-%m-%d')}."
-    
+
     for city, tz in timezone_mapping.items():
         if f"time in {city}" in user_input:
-            now = datetime.datetime.now(pytz.timezone(tz))
-            return f"The current time in {city.title()} is {now.strftime('%H:%M:%S')}."
+            dt = fetch_time_data(tz)
+            if dt:
+                return f"The current time in {city.title()} is {dt.strftime('%H:%M:%S')}."
+            else:
+                return f"Could not retrieve time for {city.title()}."
         
         elif f"date in {city}" in user_input:
-            today = datetime.datetime.now(pytz.timezone(tz)).date()
-            return f"Today's date in {city.title()} is {today.strftime('%Y-%m-%d')}."
+            dt = fetch_time_data(tz)
+            if dt:
+                return f"Today's date in {city.title()} is {dt.strftime('%Y-%m-%d')}."
+            else:
+                return f"Could not retrieve date for {city.title()}."
 
-    return "Invalid input. Try 'time', 'date', 'time in [city]', or 'date in [city]'."
+    return None  # 讓 `generate_response` 處理未知輸入
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
@@ -194,9 +216,9 @@ def get_weather(city):
 def generate_response(user_input):
     global last_joke_requested, last_translation, last_definition, last_translation_lang
     try:
-        time_response = get_time_info(user_input)
-        if time_response:
-            return time_response
+        time_date_response = get_time_or_date(user_input)
+        if time_date_response:
+            return time_date_response
 
         how_about_match = re.search(r"how about (.+)", user_input.lower())
         if how_about_match:
