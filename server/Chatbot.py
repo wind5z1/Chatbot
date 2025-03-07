@@ -123,8 +123,8 @@ def get_time_info(user_input):
             
             if timezone_str:
                 timezone = pytz.timezone(timezone_str)
-                now = datetime.datetime.now(pytz.utc).astimezone(timezone)
-                return f"The current time in {city} is {now.strftime('%H:%M:%S')}."
+                local_time = datetime.datetime.now(timezone)
+                return f"The current time in {city} is {local_time.strftime('%H:%M:%S')}."
             else:
                 print("Timezone could not be determined.")
         else:
