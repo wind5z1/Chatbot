@@ -8,6 +8,8 @@ import math
 import operator as op
 import datetime
 import pytz
+from timezonefinder import TimezoneFinder
+from geopy.geocoders import Nominatim
 from deep_translator import GoogleTranslator
 
 # 下載 NLTK 必需的資料
@@ -83,59 +85,43 @@ def translate_text(text, target_language):
     except Exception as e:
         return f"An error occurred during translation: {str(e)}"
 
-import requests
-import datetime
+def get_time_info(user_input):
+    now = datetime.datetime.now()
 
-def get_time_or_date(user_input):
-    user_input = user_input.lower().strip()
-
-    timezone_mapping = {
-        "japan": "Asia/Tokyo",
-        "new york": "America/New_York",
-        "london": "Europe/London",
-        "paris": "Europe/Paris",
-        "sydney": "Australia/Sydney",
-        "los angeles": "America/Los_Angeles"
-    }
-
-    def fetch_time_data(timezone):
-        url = f"http://worldtimeapi.org/api/timezone/{timezone}"
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                datetime_str = data["datetime"]  # ISO 8601 格式
-                dt = datetime.datetime.fromisoformat(datetime_str[:-6])  # 去掉時區資訊
-                return dt
-            else:
-                return None
-        except:
-            return None
-
-    if user_input == "time":
-        now = datetime.datetime.now()
-        return f"The current time is {now.strftime('%H:%M:%S')}."
+    if 'time' in user_input.lower():
+        return f"The current time is {now.strftime('%H:%M %S')}."
+    if 'date' in user_input.lower():
+        return f"Today's date is {now.strftime('%Y-%m-%d')}."
     
-    elif user_input == "date":
-        today = datetime.date.today()
-        return f"Today's date is {today.strftime('%Y-%m-%d')}."
-
-    for city, tz in timezone_mapping.items():
-        if f"time in {city}" in user_input:
-            dt = fetch_time_data(tz)
-            if dt:
-                return f"The current time in {city.title()} is {dt.strftime('%H:%M:%S')}."
-            else:
-                return f"Could not retrieve time for {city.title()}."
-        
-        elif f"date in {city}" in user_input:
-            dt = fetch_time_data(tz)
-            if dt:
-                return f"Today's date in {city.title()} is {dt.strftime('%Y-%m-%d')}."
-            else:
-                return f"Could not retrieve date for {city.title()}."
-
-    return None  # 讓 `generate_response` 處理未知輸入
+    date_match = re.search(r"how many days until(\w+)", user_input.lower())
+    if date_match:
+        event = date_match.group(1).strip().lower()
+        event_dates = {
+            "christmas" : datetime.date(now.year, 12, 25),
+            "new year" : datetime.date(now.year + 1, 1, 1),
+            "valentine's day" : datetime.date(now.year, 2, 14),
+            "halloween" : datetime.date(now.year, 10, 31)
+        }
+        if event in event_dates:
+            days_until = (event_dates[event] - now.date()).days
+            return f"There are {days_until} days until {event}."
+        return "I'm not clear about the event you typed.Please try other event such as 'christmas' or 'new year'."
+    timeZone_match = re.search(r"time in (\w+)", user_input.lower())
+    if timeZone_match:
+        city = timeZone_match.group(1).strip().lower()
+        geolocator = Nominatim(user_agent="geoapiExercises")
+        location = geolocator.geocode(city)
+        if location:
+            latitude =location.latitude
+            longitude = location.longitude
+            tf = TimezoneFinder()
+            timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
+        if timezone_str:
+            timezone = pytz.timezone(timezone_str)
+            now = datetime.datetime.now(timezone)
+            return f"The current time in {city} is {now.strftime('%H:%M:%S')}."
+        return f"I'm not clear about the city you typed. Please try other city such as 'new york' or 'london'."
+    return "I'm not sure what are you asking about."
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
@@ -216,9 +202,9 @@ def get_weather(city):
 def generate_response(user_input):
     global last_joke_requested, last_translation, last_definition, last_translation_lang
     try:
-        time_date_response = get_time_or_date(user_input)
-        if time_date_response:
-            return time_date_response
+        time_response = get_time_info(user_input)
+        if time_response:
+            return time_response
 
         how_about_match = re.search(r"how about (.+)", user_input.lower())
         if how_about_match:
