@@ -118,6 +118,7 @@ def get_time_info(user_input):
             tf = TimezoneFinder()
             timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
         if timezone_str:
+            now_utc = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
             timezone = pytz.timezone(timezone_str)
             now = datetime.datetime.now(timezone)
             return f"The current time in {city} is {now.strftime('%H:%M:%S')}."
