@@ -116,6 +116,7 @@ def get_time_info(user_input):
             longitude = location.longitude
             tf = TimezoneFinder()
             timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
+            print(f"Timezone found: {timezone_str}")
         if timezone_str:
             timezone = pytz.timezone(timezone_str)
             now = datetime.datetime.now(pytz.utc).astimezone(timezone)
