@@ -118,7 +118,7 @@ def get_time_info(user_input):
             timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
         if timezone_str:
             timezone = pytz.timezone(timezone_str)
-            now = datetime.datetime.now(timezone)
+            now = datetime.datetime.now(pytz.utc).astimezone(timezone)
             return f"The current time in {city} is {now.strftime('%H:%M:%S')}."
         return f"I'm not clear about the city you typed. Please try other city such as 'new york' or 'london'."
     return "I'm not sure what are you asking about."
