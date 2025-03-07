@@ -8,8 +8,6 @@ import math
 import operator as op
 import datetime
 import pytz
-from timezonefinder import TimezoneFinder
-from geopy.geocoders import Nominatim
 from deep_translator import GoogleTranslator
 
 # 下載 NLTK 必需的資料
@@ -85,66 +83,37 @@ def translate_text(text, target_language):
     except Exception as e:
         return f"An error occurred during translation: {str(e)}"
 
-def get_time_info(user_input):
-    now = datetime.datetime.now()
+def get_time_or_date(user_input):
+    user_input = user_input.lower().strip()
 
-    if 'time' in user_input.lower():
+    # 支援的時區對應
+    timezone_mapping = {
+        "japan": "Asia/Tokyo",
+        "new york": "America/New_York",
+        "london": "Europe/London",
+        "paris": "Europe/Paris",
+        "sydney": "Australia/Sydney",
+        "los angeles": "America/Los_Angeles"
+    }
+
+    if user_input == "time":
+        now = datetime.datetime.now()
         return f"The current time is {now.strftime('%H:%M:%S')}."
-    if 'date' in user_input.lower():
-        return f"Today's date is {now.strftime('%Y-%m-%d')}."
-
-    date_match = re.search(r"how many days until (.+)", user_input.lower())
-    if date_match:
-        event = date_match.group(1).strip().lower()
-        event_dates = {
-            "christmas": datetime.date(now.year, 12, 25),
-            "new year": datetime.date(now.year + 1, 1, 1),
-            "valentine's day": datetime.date(now.year, 2, 14),
-            "halloween": datetime.date(now.year, 10, 31)
-        }
-        if event in event_dates:
-            days_until = (event_dates[event] - now.date()).days
-            return f"There are {days_until} days until {event}."
-        return "I'm not clear about the event you typed. Please try other events such as 'christmas' or 'new year'."
-
-    timeZone_match = re.search(r"time in (.+)", user_input.lower())
-    if timeZone_match:
-        city = timeZone_match.group(1).strip().lower()
+    
+    elif user_input == "date":
+        today = datetime.date.today()
+        return f"Today's date is {today.strftime('%Y-%m-%d')}."
+    
+    for city, tz in timezone_mapping.items():
+        if f"time in {city}" in user_input:
+            now = datetime.datetime.now(pytz.timezone(tz))
+            return f"The current time in {city.title()} is {now.strftime('%H:%M:%S')}."
         
-        # 映射國家名稱到主要城市
-        city_mapping = {
-            "japan": "Asia/Tokyo",
-            "china": "Asia/Shanghai",
-            "usa": "America/New York",
-            "uk": "Europe/London",
-            "france": "Europe/Paris",
-            "germany": "Europe/Berlin",
-            "australia": "AustraliaSydney",
-            "india": "Asia/New Delhi"
-        }
-        timezone_str = city_mapping.get(city,None)
-        if timezone_str:
-            timezone = pytz.timezone(timezone_str)
-            now = datetime.datetime.now(timezone)
-            return f"The current time in {city} is {now.strftime('%H:%M:%S')}."
-        else:
-            # 嘗試地理編碼
-            geolocator = Nominatim(user_agent="my_unique_app_name")
-            location = geolocator.geocode(city)
-            if location:
-                latitude = location.latitude
-                longitude = location.longitude
-                tf = TimezoneFinder()
-                timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
-                if timezone_str:
-                    timezone = pytz.timezone(timezone_str)
-                    now = datetime.datetime.now(timezone)
-                    return f"The current time in {city} is {now.strftime('%H:%M:%S')}."
-                else:
-                    return f"Could not determine the timezone for {city}."
-            else:
-                return f"Could not find the location for {city}."
-    return "I'm not sure what you're asking about."
+        elif f"date in {city}" in user_input:
+            today = datetime.datetime.now(pytz.timezone(tz)).date()
+            return f"Today's date in {city.title()} is {today.strftime('%Y-%m-%d')}."
+
+    return "Invalid input. Try 'time', 'date', 'time in [city]', or 'date in [city]'."
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
