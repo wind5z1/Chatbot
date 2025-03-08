@@ -7,9 +7,6 @@ import re
 import math
 import operator as op
 import datetime
-import pytz
-from timezonefinder import TimezoneFinder
-from geopy.geocoders import Nominatim
 from deep_translator import GoogleTranslator
 
 # 下載 NLTK 必需的資料
@@ -112,33 +109,30 @@ def get_time_info(user_input):
         city = timeZone_match.group(1).strip().lower()
         print(f"City input: {city}")  # 打印用户输入的城市名称
 
-        geolocator = Nominatim(user_agent="my_geocoding_app")
-        try:
-            location = geolocator.geocode(city, timeout=10)  # 增加超时时间
-            if location:
-                print(f"Location found: {location}")  # 打印找到的位置信息
-                latitude = location.latitude
-                longitude = location.longitude
-                tf = TimezoneFinder()
-                timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
-                print(f"Timezone found: {timezone_str}")  # 打印找到的时区
+        api_url = f"http://worldtimeapi.org/api/timezone"
+        response = requests.get(api_url)
 
-                if timezone_str:
-                    timezone = pytz.timezone(timezone_str)
-                    local_time = datetime.datetime.now(timezone)
-                    return f"The current time in {city} is {local_time.strftime('%H:%M:%S')}."
+        if response.status_code == 200:
+            timezones = response.json()
+            matching_timezones =[tz for tz in timezones if city in tz]
+
+            if matching_timezones:
+                city_timezone = matching_timezones[0]
+                time_response = requests.get(f"http://worldtimeapi.org/api/timezone/{city_timezone}")
+                
+                if time_response.status_code == 200:
+                    time_data = time_response.json()
+                    current_time = time_data['datetime'][:19].replace('T', ' ')
+                    return f"The current time in {city} is {current_time}."
                 else:
-                    print("Timezone could not be determined.")
-                    return f"Sorry, I couldn't determine the timezone for {city}."
+                    return f"Failed to fetch time information for {city}."
             else:
-                print("Location not found.")
-                return f"Sorry, I couldn't find the city '{city}'. Please try again with a more specific name."
-        except Exception as e:
-            print(f"Geocoding API error: {e}")
-            return "An error occurred while fetching the location. Please try again later."
-
-    return "I'm not sure what you are asking about."
-
+                return f"No matching time zone found for {city}."
+        else:
+            return f"Failed to fetch time zone information."
+        
+    return "Please say the the time you want to check one more time."
+                
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
