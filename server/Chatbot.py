@@ -7,6 +7,7 @@ import re
 import math
 import operator as op
 import datetime
+from datetime import datetime, timedelta
 from deep_translator import GoogleTranslator
 
 # 下載 NLTK 必需的資料
@@ -85,10 +86,10 @@ def translate_text(text, target_language):
 def get_time_info(user_input):
   
     if 'time' in user_input.lower():
-        now = datetime.datetime.now()
+        now = datetime.now()
         return f"The current time is {now.strftime('%H:%M:%S')}."
     if 'date' in user_input.lower():
-        now = datetime.datetime.now()
+        now = datetime.now()    
         return f"Today's date is {now.strftime('%Y-%m-%d')}."
     
     date_match = re.search(r"how many days until (\w+)", user_input.lower())
@@ -128,8 +129,13 @@ def get_time_info(user_input):
 
                 if time_response.status_code == 200:
                     time_data = time_response.json()
-                    current_time = time_data['dateTime'][:19].replace('T', ' ')
-                    return f"The current time in {city} is {current_time}."
+                    utc_time = datatime.fromisoformat(time_data['utc_datetime'])
+                    utc_offset = time_data['utc_offset']
+                    offser_hours = int(utc_offset[:3])
+                    offset_minutes = int(utc_offset[4:6])
+                    local_time = utc_time + timedelta(hours=offser_hours, minutes=offset_minutes)
+                    formatted_time = local_time.strftime("%Y-%m-%d %H:%M:%S")
+                    return f"The current time in {city} is {formatted_time}."
                 else:
                     return f"Failed to fetch time information for {city}."
             else:
