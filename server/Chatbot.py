@@ -110,26 +110,32 @@ def get_time_info(user_input):
     timeZone_match = re.search(r"time in (\w+)", user_input.lower())
     if timeZone_match:
         city = timeZone_match.group(1).strip().lower()
-        geolocator = Nominatim(user_agent="geoapiExercises")
-        location = geolocator.geocode(city)
-        
-        # 增加檢查 location 是否為 None
-        if location:
-            latitude = location.latitude
-            longitude = location.longitude
-            tf = TimezoneFinder()
-            timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
-            print(f"Timezone found: {timezone_str}")  # 確認 timezone_str 是否有效
-            
-            if timezone_str:
-                timezone = pytz.timezone(timezone_str)
-                local_time = datetime.datetime.now(timezone)
-                return f"The current time in {city} is {local_time.strftime('%H:%M:%S')}."
+        print(f"City input: {city}")  # 打印用户输入的城市名称
+
+        geolocator = Nominatim(user_agent="my_geocoding_app")
+        try:
+            location = geolocator.geocode(city, timeout=10)  # 增加超时时间
+            if location:
+                print(f"Location found: {location}")  # 打印找到的位置信息
+                latitude = location.latitude
+                longitude = location.longitude
+                tf = TimezoneFinder()
+                timezone_str = tf.timezone_at(lng=longitude, lat=latitude)
+                print(f"Timezone found: {timezone_str}")  # 打印找到的时区
+
+                if timezone_str:
+                    timezone = pytz.timezone(timezone_str)
+                    local_time = datetime.datetime.now(timezone)
+                    return f"The current time in {city} is {local_time.strftime('%H:%M:%S')}."
+                else:
+                    print("Timezone could not be determined.")
+                    return f"Sorry, I couldn't determine the timezone for {city}."
             else:
-                print("Timezone could not be determined.")
-        else:
-            print(f"Location for {city} could not be found.")
-        return f"I'm not clear about the city you typed. Please try other cities such as 'new york' or 'london'."
+                print("Location not found.")
+                return f"Sorry, I couldn't find the city '{city}'. Please try again with a more specific name."
+        except Exception as e:
+            print(f"Geocoding API error: {e}")
+            return "An error occurred while fetching the location. Please try again later."
 
     return "I'm not sure what you are asking about."
 
