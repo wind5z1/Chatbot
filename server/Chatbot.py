@@ -129,7 +129,7 @@ def get_time_info(user_input):
 
                 if time_response.status_code == 200:
                     time_data = time_response.json()
-                    utc_time = datatime.fromisoformat(time_data['utc_datetime'])
+                    utc_time = datetime.fromisoformat(time_data['utc_datetime'])
                     utc_offset = time_data['utc_offset']
                     offser_hours = int(utc_offset[:3])
                     offset_minutes = int(utc_offset[4:6])
