@@ -7,7 +7,7 @@ import re
 import math
 import operator as op
 import datetime
-from datetime import datetime, date
+import pytz
 from deep_translator import GoogleTranslator
 
 # 下載 NLTK 必需的資料
@@ -82,37 +82,49 @@ def translate_text(text, target_language):
             return "Translation failed. Please try again."
     except Exception as e:
         return f"An error occurred during translation: {str(e)}"
-
+    
 def get_time_info(user_input):
-    try:
-        now = datetime.now()  # 統一獲取當前系統時間
+    doc = nlp(user_input.lower())
     
-    # 檢查是否詢問本地時間
-        if 'time' in user_input.lower():
-            return f"Current local time: {now.strftime('%H:%M:%S')}"
+    # 檢查是否提到 "time" 或 "date"
+    if "time" in user_input.lower() or "date" in user_input.lower():
+        # 嘗試從句子中找出地點（GPE = 地理位置實體）
+        locations = [ent.text for ent in doc.ents if ent.label_ == "GPE"]
+        
+        # 時區對應表，可以擴充
+        timezone_map = {
+            "new york": "America/New_York",
+            "london": "Europe/London",
+            "paris": "Europe/Paris",
+            "tokyo": "Asia/Tokyo",
+            "beijing": "Asia/Shanghai",
+            "hong kong": "Asia/Hong_Kong",
+            "taipei": "Asia/Taipei",
+            "sydney": "Australia/Sydney",
+            "los angeles": "America/Los_Angeles"
+        }
+
+        if locations:
+            location = locations[0].lower()
+            if location in timezone_map:
+                tz = pytz.timezone(timezone_map[location])
+                now = datetime.datetime.now(tz)
+                if "time" in user_input.lower():
+                    return f"The current time in {location.title()} is {now.strftime('%H:%M:%S')}."
+                elif "date" in user_input.lower():
+                    return f"The current date in {location.title()} is {now.strftime('%Y-%m-%d')}."
+            else:
+                return "Sorry, I don't know the timezone for that location. Please try another city."
+        
+        # 如果沒有提供地點，就返回 UTC 時間
+        now = datetime.datetime.utcnow()
+        if "time" in user_input.lower():
+            return f"The current UTC time is {now.strftime('%H:%M:%S')}."
+        elif "date" in user_input.lower():
+            return f"The current UTC date is {now.strftime('%Y-%m-%d')}."
     
-    # 檢查是否詢問日期
-        if 'date' in user_input.lower():
-            return f"Today's date: {now.strftime('%Y-%m-%d')}"
-    
-    # 檢查節日倒數
-        date_match = re.search(r"how many days until (\w+)", user_input.lower())
-        if date_match:
-            event = date_match.group(1).strip().lower()
-            event_dates = {
-                "christmas": date(now.year, 12, 25),
-                "new year": date(now.year + 1, 1, 1),
-                "valentine's day": date(now.year, 2, 14),
-                "halloween": date(now.year, 10, 31)
-            }
-            if event in event_dates:
-                days_until = (event_dates[event] - now.date()).days
-                return f"Days until {event}: {days_until}"
-            return "Unknown event. Try 'Christmas' or 'New Year'."
-    
-        return "Please ask about time, date, or an event countdown."
-    except Exception as e:
-        return f"Error in time calculation: {str(e)}"
+    return None  # 如果沒有符合的條件，返回 None
+
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
