@@ -7,7 +7,6 @@ import re
 import math
 import operator as op
 import datetime
-from datetime import datetime, timedelta
 from deep_translator import GoogleTranslator
 
 # 下載 NLTK 必需的資料
@@ -84,66 +83,32 @@ def translate_text(text, target_language):
         return f"An error occurred during translation: {str(e)}"
 
 def get_time_info(user_input):
-  
-    if 'time' in user_input.lower():
-        now = datetime.now()
-        return f"The current time is {now.strftime('%H:%M:%S')}."
-    if 'date' in user_input.lower():
-        now = datetime.now()    
-        return f"Today's date is {now.strftime('%Y-%m-%d')}."
+    now = datetime.now()  # 統一獲取當前系統時間
     
+    # 檢查是否詢問本地時間
+    if 'time' in user_input.lower():
+        return f"Current local time: {now.strftime('%H:%M:%S')}"
+    
+    # 檢查是否詢問日期
+    if 'date' in user_input.lower():
+        return f"Today's date: {now.strftime('%Y-%m-%d')}"
+    
+    # 檢查節日倒數
     date_match = re.search(r"how many days until (\w+)", user_input.lower())
     if date_match:
         event = date_match.group(1).strip().lower()
         event_dates = {
-            "christmas": datetime.date(now.year, 12, 25),
-            "new year": datetime.date(now.year + 1, 1, 1),
-            "valentine's day": datetime.date(now.year, 2, 14),
-            "halloween": datetime.date(now.year, 10, 31)
+            "christmas": datetime(now.year, 12, 25).date(),
+            "new year": datetime(now.year + 1, 1, 1).date(),
+            "valentine's day": datetime(now.year, 2, 14).date(),
+            "halloween": datetime(now.year, 10, 31).date()
         }
         if event in event_dates:
             days_until = (event_dates[event] - now.date()).days
-            return f"There are {days_until} days until {event}."
-        return "I'm not clear about the event you typed. Please try other events such as 'christmas' or 'new year'."
+            return f"Days until {event}: {days_until}"
+        return "Unknown event. Try 'Christmas' or 'New Year'."
     
-    # 正規表達式匹配 "time in [city]"
-    timeZone_match = re.search(r"time in ([\w\s]+)", user_input.lower())
-    if timeZone_match:
-        city = timeZone_match.group(1).strip().title()  # 讓首字母大寫，例如 new york -> New York
-        print(f"City input: {city}")  # Debugging
-
-        # Step 1: 查詢該城市的時區
-        timezone_api_url = f"http://worldtimeapi.org/api/timezone"
-        response = requests.get(timezone_api_url)
-
-        if response.status_code == 200:
-            timezone_data = response.json()
-            matching_timezones= [tz for tz in timezone_data if city.lower() in tz.lower()]
-            if matching_timezones:
-                city_timezone = matching_timezones[0]
-                print(f"Found Timezone:{city_timezone}")
-
-                # Step 2: 使用該時區查詢當前時間
-                time_api_url = f"http://worldtimeapi.org/api/timezone/{city_timezone}"
-                time_response = requests.get(time_api_url)
-
-                if time_response.status_code == 200:
-                    time_data = time_response.json()
-                    utc_time = datetime.fromisoformat(time_data['utc_datetime'])
-                    utc_offset = time_data['utc_offset']
-                    offser_hours = int(utc_offset[:3])
-                    offset_minutes = int(utc_offset[4:6])
-                    local_time = utc_time + timedelta(hours=offser_hours, minutes=offset_minutes)
-                    formatted_time = local_time.strftime("%Y-%m-%d %H:%M:%S")
-                    return f"The current time in {city} is {formatted_time}."
-                else:
-                    return f"Failed to fetch time information for {city}."
-            else:
-                return f"No matching time zone found for {city}."
-        else:
-            return f"Failed to fetch time zone information."
-
-    return "Please say the time you want to check one more time."
+    return "Please ask about time, date, or an event countdown."
                 
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
