@@ -83,10 +83,12 @@ def translate_text(text, target_language):
         return f"An error occurred during translation: {str(e)}"
 
 def get_time_info(user_input):
-    now = datetime.datetime.now()
+  
     if 'time' in user_input.lower():
+        now = datetime.datetime.now()
         return f"The current time is {now.strftime('%H:%M:%S')}."
     if 'date' in user_input.lower():
+        now = datetime.datetime.now()
         return f"Today's date is {now.strftime('%Y-%m-%d')}."
     
     date_match = re.search(r"how many days until (\w+)", user_input.lower())
