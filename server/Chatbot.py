@@ -85,13 +85,13 @@ def translate_text(text, target_language):
     
 def get_time_info(user_input):
     doc = nlp(user_input.lower())
-    
+
     # 檢查是否提到 "time" 或 "date"
     if "time" in user_input.lower() or "date" in user_input.lower():
         # 嘗試從句子中找出地點（GPE = 地理位置實體）
-        locations = [ent.text for ent in doc.ents if ent.label_ == "GPE"]
-        
-        # 時區對應表，可以擴充
+        locations = [ent.text.lower() for ent in doc.ents if ent.label_ == "GPE"]
+
+        # 城市對應的時區
         timezone_map = {
             "new york": "America/New_York",
             "london": "Europe/London",
@@ -101,11 +101,36 @@ def get_time_info(user_input):
             "hong kong": "Asia/Hong_Kong",
             "taipei": "Asia/Taipei",
             "sydney": "Australia/Sydney",
-            "los angeles": "America/Los_Angeles"
+            "los angeles": "America/Los_Angeles",
+            "malaysia": "Asia/Kuala_Lumpur",
+            "singapore": "Asia/Singapore",
+            "korea": "Asia/Seoul"
+        }
+
+        # 國家對應的主要城市
+        country_timezone_map = {
+            "japan": "tokyo",
+            "china": "beijing",
+            "usa": "new york",
+            "america": "new york",
+            "australia": "sydney",
+            "uk": "london",
+            "united kingdom": "london",
+            "france": "paris",
+            "taiwan": "taipei",
+            "singapore": "singapore",
+            "malaysia": "malaysia",
+            "korea": "korea"
         }
 
         if locations:
-            location = locations[0].lower()
+            location = locations[0]
+
+            # 如果輸入的是國家名稱，轉換為城市名稱
+            if location in country_timezone_map:
+                location = country_timezone_map[location]
+
+            # 檢查城市是否在時區對應表內
             if location in timezone_map:
                 tz = pytz.timezone(timezone_map[location])
                 now = datetime.datetime.now(tz)
@@ -124,7 +149,6 @@ def get_time_info(user_input):
             return f"The current UTC date is {now.strftime('%Y-%m-%d')}."
     
     return None  # 如果沒有符合的條件，返回 None
-
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
