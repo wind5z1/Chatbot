@@ -83,7 +83,7 @@ def translate_text(text, target_language):
         return f"An error occurred during translation: {str(e)}"
 
 def get_time_info(user_input):
-   
+    now = datetime.datetime.now()
     if 'time' in user_input.lower():
         return f"The current time is {now.strftime('%H:%M:%S')}."
     if 'date' in user_input.lower():
@@ -115,7 +115,7 @@ def get_time_info(user_input):
 
         if response.status_code == 200:
             timezone_data = response.json()
-            matching_timezones= [tz for tz in timezones if city.lower() in tz.lower()]
+            matching_timezones= [tz for tz in timezone_data if city.lower() in tz.lower()]
             if matching_timezones:
                 city_timezone = matching_timezones[0]
                 print(f"Found Timezone:{city_timezone}")
