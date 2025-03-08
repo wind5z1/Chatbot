@@ -83,8 +83,7 @@ def translate_text(text, target_language):
         return f"An error occurred during translation: {str(e)}"
 
 def get_time_info(user_input):
-    now = datetime.datetime.now()
-
+   
     if 'time' in user_input.lower():
         return f"The current time is {now.strftime('%H:%M:%S')}."
     if 'date' in user_input.lower():
@@ -111,17 +110,18 @@ def get_time_info(user_input):
         print(f"City input: {city}")  # Debugging
 
         # Step 1: 查詢該城市的時區
-        timezone_api_url = f"https://www.timeapi.io/api/TimeZone/zone?area={city}"
+        timezone_api_url = f"http://worldtimeapi.org/api/timezone"
         response = requests.get(timezone_api_url)
 
         if response.status_code == 200:
             timezone_data = response.json()
-            if 'timeZone' in timezone_data:
-                city_timezone = timezone_data['timeZone']
-                print(f"Found Timezone: {city_timezone}")  # Debugging
+            matching_timezones= [tz for tz in timezones if city.lower() in tz.lower()]
+            if matching_timezones:
+                city_timezone = matching_timezones[0]
+                print(f"Found Timezone:{city_timezone}")
 
                 # Step 2: 使用該時區查詢當前時間
-                time_api_url = f"https://www.timeapi.io/api/Time/current/zone?timeZone={city_timezone}"
+                time_api_url = f"http://worldtimeapi.org/api/timezone/{city_timezone}"
                 time_response = requests.get(time_api_url)
 
                 if time_response.status_code == 200:
