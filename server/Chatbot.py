@@ -7,6 +7,7 @@ import re
 import math
 import operator as op
 import datetime
+from datetime import datetime, date
 from deep_translator import GoogleTranslator
 
 # 下載 NLTK 必需的資料
@@ -83,33 +84,35 @@ def translate_text(text, target_language):
         return f"An error occurred during translation: {str(e)}"
 
 def get_time_info(user_input):
-    now = datetime.now()  # 統一獲取當前系統時間
+    try:
+        now = datetime.now()  # 統一獲取當前系統時間
     
     # 檢查是否詢問本地時間
-    if 'time' in user_input.lower():
-        return f"Current local time: {now.strftime('%H:%M:%S')}"
+        if 'time' in user_input.lower():
+            return f"Current local time: {now.strftime('%H:%M:%S')}"
     
     # 檢查是否詢問日期
-    if 'date' in user_input.lower():
-        return f"Today's date: {now.strftime('%Y-%m-%d')}"
+        if 'date' in user_input.lower():
+            return f"Today's date: {now.strftime('%Y-%m-%d')}"
     
     # 檢查節日倒數
-    date_match = re.search(r"how many days until (\w+)", user_input.lower())
-    if date_match:
-        event = date_match.group(1).strip().lower()
-        event_dates = {
-            "christmas": datetime(now.year, 12, 25).date(),
-            "new year": datetime(now.year + 1, 1, 1).date(),
-            "valentine's day": datetime(now.year, 2, 14).date(),
-            "halloween": datetime(now.year, 10, 31).date()
-        }
-        if event in event_dates:
-            days_until = (event_dates[event] - now.date()).days
-            return f"Days until {event}: {days_until}"
-        return "Unknown event. Try 'Christmas' or 'New Year'."
+        date_match = re.search(r"how many days until (\w+)", user_input.lower())
+        if date_match:
+            event = date_match.group(1).strip().lower()
+            event_dates = {
+                "christmas": date(now.year, 12, 25),
+                "new year": date(now.year + 1, 1, 1),
+                "valentine's day": date(now.year, 2, 14),
+                "halloween": date(now.year, 10, 31)
+            }
+            if event in event_dates:
+                days_until = (event_dates[event] - now.date()).days
+                return f"Days until {event}: {days_until}"
+            return "Unknown event. Try 'Christmas' or 'New Year'."
     
-    return "Please ask about time, date, or an event countdown."
-                
+        return "Please ask about time, date, or an event countdown."
+    except Exception as e:
+        return f"Error in time calculation: {str(e)}"
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
