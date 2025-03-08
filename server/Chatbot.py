@@ -94,35 +94,39 @@ def get_time_info(user_input):
     if date_match:
         event = date_match.group(1).strip().lower()
         event_dates = {
-            "christmas" : datetime.date(now.year, 12, 25),
-            "new year" : datetime.date(now.year + 1, 1, 1),
-            "valentine's day" : datetime.date(now.year, 2, 14),
-            "halloween" : datetime.date(now.year, 10, 31)
+            "christmas": datetime.date(now.year, 12, 25),
+            "new year": datetime.date(now.year + 1, 1, 1),
+            "valentine's day": datetime.date(now.year, 2, 14),
+            "halloween": datetime.date(now.year, 10, 31)
         }
         if event in event_dates:
             days_until = (event_dates[event] - now.date()).days
             return f"There are {days_until} days until {event}."
         return "I'm not clear about the event you typed. Please try other events such as 'christmas' or 'new year'."
     
-    timeZone_match = re.search(r"time in (\w+)", user_input.lower())
+    # 正規表達式匹配 "time in [city]"
+    timeZone_match = re.search(r"time in ([\w\s]+)", user_input.lower())
     if timeZone_match:
-        city = timeZone_match.group(1).strip().lower()
-        print(f"City input: {city}")  # 打印用户输入的城市名称
+        city = timeZone_match.group(1).strip().title()  # 讓首字母大寫，例如 new york -> New York
+        print(f"City input: {city}")  # Debugging
 
-        api_url = f"http://worldtimeapi.org/api/timezone"
-        response = requests.get(api_url)
+        # Step 1: 查詢該城市的時區
+        timezone_api_url = f"https://www.timeapi.io/api/TimeZone/zone?area={city}"
+        response = requests.get(timezone_api_url)
 
         if response.status_code == 200:
-            timezones = response.json()
-            matching_timezones =[tz for tz in timezones if city in tz]
+            timezone_data = response.json()
+            if 'timeZone' in timezone_data:
+                city_timezone = timezone_data['timeZone']
+                print(f"Found Timezone: {city_timezone}")  # Debugging
 
-            if matching_timezones:
-                city_timezone = matching_timezones[0]
-                time_response = requests.get(f"http://worldtimeapi.org/api/timezone/{city_timezone}")
-                
+                # Step 2: 使用該時區查詢當前時間
+                time_api_url = f"https://www.timeapi.io/api/Time/current/zone?timeZone={city_timezone}"
+                time_response = requests.get(time_api_url)
+
                 if time_response.status_code == 200:
                     time_data = time_response.json()
-                    current_time = time_data['datetime'][:19].replace('T', ' ')
+                    current_time = time_data['dateTime'][:19].replace('T', ' ')
                     return f"The current time in {city} is {current_time}."
                 else:
                     return f"Failed to fetch time information for {city}."
@@ -130,8 +134,8 @@ def get_time_info(user_input):
                 return f"No matching time zone found for {city}."
         else:
             return f"Failed to fetch time zone information."
-        
-    return "Please say the the time you want to check one more time."
+
+    return "Please say the time you want to check one more time."
                 
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
