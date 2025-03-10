@@ -312,7 +312,7 @@ def generate_response(user_input):
             if name_match:
                 context_memory["user_name"] = name_match.group(1)
                 save_context()
-                return f"Nice to meet you, {context_memory["user_name"]}!"
+                return f"Nice to meet you, {context_memory['user_name']}!"
         if "what is my name" in user_input.lower():
             if context_memory["user_name"]:
                 return f"Your name is {context_memory['user_name']}!"
