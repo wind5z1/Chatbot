@@ -1,4 +1,5 @@
 import subprocess
+import json
 import contractions
 import spacy
 import platform
@@ -13,11 +14,13 @@ from deep_translator import GoogleTranslator
 # 下載 NLTK 必需的資料
 nlp = spacy.load("en_core_web_sm")
 
-last_joke_requested = False
-last_translation = None
-last_definition = None
-last_translation_lang = None
-
+context_memory = {
+    "last_joke_requested" : False,
+    "last_translation" : None,
+    "last_definition" : None,
+    "last_translation_lang" : None,
+    "user_name" : None
+}
 operators = {
     "+" : op.add,
     "-" : op.sub,
@@ -34,6 +37,18 @@ math_functions = {
     "log10" : math.log10,
     "exp" : math.exp
 }
+
+def save_context():
+    with open("context_memory.json", "w") as f:
+        json.dump(context_memory, f)
+def load_context():
+    global context_memory
+    try:
+        with open("context_memory.json", "r") as f:
+            context_memory =json.load(f)
+    except FileNotFoundError:
+        pass 
+load_context()   
 
 def preprocess_text(text):
     text = contractions.fix(text)
@@ -227,38 +242,35 @@ def get_weather(city):
         return "An error occurred while fetching weather data."
 
 def generate_response(user_input):
-    global last_joke_requested, last_translation, last_definition, last_translation_lang
+    global context_memory
     try:
         time_response = get_time_info(user_input)
         if time_response:
             return time_response
 
-        how_about_match = re.search(r"how about (.+)", user_input.lower())
-        if how_about_match:
-            new_query = how_about_match.group(1).strip()
-            if last_translation is not None:
-                return translate_text(new_query, last_translation_lang)
-            if last_definition is not None:
+        if re.search(r"how about(.+)", user_input.lower()):
+            new_query = re.search(r"how about(.+)", user_input.lower()).group(1).strip()
+            if context_memory["last_translation"]:
+                return translate_text(new_query,context_memory["last_translation_lang"])
+            if context_memory["last_defination"]:
                 return get_definition(new_query)
             return "Could you clarify what you mean by 'how about'?"
-        define_match = re.search(r"define\s+(\w+)", user_input.lower())
-        if define_match:
-            word = define_match.group(1)
-            last_definition = word
-            return get_definition(word)
-
+        
         if "translate" in user_input.lower() and "to" in user_input.lower():
             match = re.search(r"translate (.+?) to (\w+)", user_input.lower())
             if match:
                 text, lang = match.groups()
-                if text.strip() and lang.strip():
-                    last_translation = text.strip()
-                    last_translation_lang = lang.strip()
-                    return translate_text(text.strip(), lang.strip())
-                else:
-                    "Please provide both text and target language."
-            else:
-                return "Please use the format: translate [your text] to [desired language]."
+                context_memory["last_translation"] = text.strip()
+                context_memory["last_translation_lang"] = lang.strip()
+                save_context()
+                return translate_text(text.strip(), lang.strip())
+            
+        define_match = re.search(r"define\s+(\w+)",user_input.lower())
+        if define_match:
+            word = define_match.group(1)
+            context_memory["last_defination"] = word
+            save_context()
+            return get_definition(word)
         
         app_command = check_for_app_command(user_input)
         if app_command:
@@ -286,15 +298,26 @@ def generate_response(user_input):
             else:
                 return "Please provide a city name."
         
-        next_joke_keywords = ["next", "next joke"]
-        if last_joke_requested and any(keyword in  user_input.lower() for keyword in next_joke_keywords):
-            return get_joke()
         joke_keywords = ["joke", "funny", "tell me a joke"]
         if any(keyword in user_input.lower() for keyword in joke_keywords):
-            last_joke_requested = True
+            context_memory["last_joke_requested"] = True
+            save_context()
             return get_joke()
-        last_joke_requested = False
-
+        if context_memory["last_joke_requested"] and "next" in user_input.lower():
+            return get_joke()
+        context_memory["last_joke_requested"] = False
+        save_context()  # 存檔
+        if "my name is" in user_input.lower():
+            name_match = re.search(r"my name is (\w+)", user_input.lower())
+            if name_match:
+                context_memory["user_name"] = name_match.group(1)
+                save_context()
+                return f"Nice to meet you, {context_memory["user_name"]}!"
+        if "what is my name" in user_input.lower():
+            if context_memory["user_name"]:
+                return f"Your name is {context_memory['user_name']}!"
+            else:
+                return "I don't know your name yet.What's your name?"
         tokens = preprocess_text(user_input)
         user_sentences = " ".join(tokens)
 
