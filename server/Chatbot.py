@@ -241,12 +241,12 @@ def get_weather(city, day_offset):
                 weather_description = data["weather"][0]["description"]
                 return f"The temperature in {city} is {weather_description} with a temperature of {temperature_celsius:.1f}°C."
             else:
-                today = datetime.datetime.utcnow().date()
+                today = datetime.datetime.now(datetime.timezone.utc).date()
                 target_date = today + datetime.timedelta(days=day_offset)
                 weather_list =  data["list"]
                 target_forecasts = [
                     entry for entry in weather_list
-                    if datetime.datetime.utcfromtimestamp(entry["dt"].date()== target_date)
+                    if datetime.datetime.fromtimestamp(entry["dt"], tz=datetime.timezone.utc).date()==target_date
                 ]
                 if not target_forecasts:
                     return f"Sorry,i couldn't find the weather for {city} on {target_date}."
