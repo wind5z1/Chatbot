@@ -235,7 +235,7 @@ def get_weather(city, day_offset):
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()
-            if day_offset:
+            if day_offset == 0:
                 temperature_kelvin = data["main"]["temp"]
                 temperature_celsius = temperature_kelvin - 273.15
                 weather_description = data["weather"][0]["description"]
@@ -310,9 +310,14 @@ def generate_response(user_input):
         if any(keyword in user_input.lower() for keyword in weather_keyword):
             doc = nlp(user_input.lower())
             cities = [ent.text for ent in doc.ents if ent.label_ == "GPE"]
+            day_offset = 0
+            if  "tomorrow" in user_input.lower():
+                day_offset = 1
+            elif "day after tomorrow" in user_input.lower():
+                day_offset = 2
             if cities:
                 city = cities[0]
-                weather_info = get_weather(city)
+                weather_info = get_weather(city, day_offset)
                 return weather_info
             else:
                 return "Please provide a city name."
