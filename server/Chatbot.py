@@ -10,9 +10,11 @@ import operator as op
 import datetime
 import pytz
 from deep_translator import GoogleTranslator
+from spellchecker import SpellChecker
 
 # 下載 NLTK 必需的資料
 nlp = spacy.load("en_core_web_sm")
+spell = SpellChecker()
 
 context_memory = {
     "last_joke_requested" : False,
@@ -49,6 +51,14 @@ def load_context():
     except FileNotFoundError:
         pass 
 load_context()   
+
+def correct_spelling(text):
+    words = text.split()
+    corrected_words = []
+    for word in words:
+        corrected_word = spell.correction(word)
+        corrected_words.append(corrected_word)
+    return ' '.join(corrected_words)
 
 def preprocess_text(text):
     text = contractions.fix(text)
@@ -263,6 +273,7 @@ def get_weather(city, day_offset):
 def generate_response(user_input):
     global context_memory
     try:
+        user_input = correct_spelling(user_input)
         time_response = get_time_info(user_input)
         if time_response:
             return time_response
