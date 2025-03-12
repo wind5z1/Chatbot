@@ -11,10 +11,12 @@ import datetime
 import pytz
 from deep_translator import GoogleTranslator
 from spellchecker import SpellChecker
+from transformers import pipeline
 
 # 下載 NLTK 必需的資料
 nlp = spacy.load("en_core_web_sm")
 spell = SpellChecker()
+chatbot = pipeline("text-generation", model="gpt2")
 
 context_memory = {
     "last_joke_requested" : False,
@@ -269,6 +271,9 @@ def get_weather(city, day_offset):
             return "Are you sure you living in earth?"
     except  Exception as e:
         return "An error occurred while fetching weather data."
+def generate_hugging_face_response(user_input):
+    response= chatbot(user_input,max_length=100,num_return_sequences=1)
+    return response[0]['generated_text']
 
 def generate_response(user_input):
     global context_memory
@@ -362,13 +367,13 @@ def generate_response(user_input):
         favorites = ["favourite", "love", "like"]
 
         if any(greeting in user_sentences for greeting in greetings):
-            return "Hello! How can I assist you today?"
+            return generate_hugging_face_response("Hello! How can I assist you today?")
         elif any(farewell in user_input.lower() for farewell in farewells):
-            return "Goodbye! Have a nice day!"
+            return generate_hugging_face_response("Goodbye! Have a nice day!")
         elif any(help_intent in user_input.lower() for help_intent in help_intents):
-            return "I can chat with you in simple conversations. You can ask me anything!"
+            return generate_hugging_face_response("I can chat with you in simple conversations. You can ask me anything!")
         elif any(favourite in user_sentences for favourite in favorites):
-            return "I like to chat with you!"
+            return generate_hugging_face_response("I like to chat with you!")
         return "I'm not sure how to respond to that."
     
     except Exception as e:
