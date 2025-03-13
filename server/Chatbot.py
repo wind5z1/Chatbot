@@ -16,7 +16,7 @@ from transformers import pipeline
 # 下載 NLTK 必需的資料
 nlp = spacy.load("en_core_web_sm")
 spell = SpellChecker()
-chatbot = pipeline("text-generation", model="distilgpt2")
+chatbot = pipeline("text-generation", model="distilgpt2", truncation=True, max_length=100)
 
 context_memory = {
     "last_joke_requested" : False,
