@@ -85,7 +85,7 @@ def get_definition(word):
         return f"Sorry, I couldn't find the definition of the word '{word}'."
 
 def get_quote():
-    url="https://api.quotable.io.random"
+    url="https://thequoteshub.com/api/"
     try:
         response = requests.get(url)
         if response.status_code==200:
