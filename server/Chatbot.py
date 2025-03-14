@@ -85,7 +85,7 @@ def get_definition(word):
         return f"Sorry, I couldn't find the definition of the word '{word}'."
 
 def get_quote():
-    url="https://thequoteshub.com/api/"
+    url="https://api.quotable.io/random"
     try:
         response = requests.get(url)
         if response.status_code==200:
@@ -94,7 +94,7 @@ def get_quote():
         else:
             return f"Let me think what quote can i choose for you..."
     except Exception as e:
-        return f"An error occured while fetching the quote: str{e}"
+        return f"An error occured while fetching the quote: str(e)"
 
 def translate_text(text, target_language):
     try:
