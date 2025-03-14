@@ -3,11 +3,17 @@ from flask_cors import CORS
 from Chatbot import generate_response
 import nltk
 import os
+import requests
 
 # 確保 NLTK 需要的資源下載
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
-
+API_TOKEN = "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"
+API_URL = "https://api-inference.huggingface.co/models/distilgpt2"
+HEADERS={
+    "Authorization": f"Bearer {API_TOKEN}",
+    "Content-Type": "application/json"
+}
 # Flask 設定
 app = Flask(__name__, static_folder='../client', template_folder='../client')
 CORS(app)

@@ -11,12 +11,10 @@ import datetime
 import pytz
 from deep_translator import GoogleTranslator
 from spellchecker import SpellChecker
-from transformers import pipeline
 
 # 下載 NLTK 必需的資料
 nlp = spacy.load("en_core_web_sm")
 spell = SpellChecker()
-chatbot = pipeline("text-generation", model="distilgpt2", truncation=True, max_length=50)
 
 context_memory = {
     "last_joke_requested" : False,
@@ -271,10 +269,7 @@ def get_weather(city, day_offset):
             return "Are you sure you living in earth?"
     except  Exception as e:
         return "An error occurred while fetching weather data."
-def generate_hugging_face_response(user_input):
-    response= chatbot(user_input,max_length=100,num_return_sequences=1)
-    return response[0]['generated_text']
-
+    
 def generate_response(user_input):
     global context_memory
     try:
@@ -367,13 +362,41 @@ def generate_response(user_input):
         favorites = ["favourite", "love", "like"]
 
         if any(greeting in user_sentences for greeting in greetings):
-            return generate_hugging_face_response("Hello! How can I assist you today?")
+            response=requests.post(
+                "https://chatbot-do41.onrender.com",
+                json={"message": "Hello! How can i assist you today?"}
+            )
+            if response.status_code == 200:
+                return response.json()["response"]
+            else:
+                return "Sorry,something went wrong."
         elif any(farewell in user_input.lower() for farewell in farewells):
-            return generate_hugging_face_response("Goodbye! Have a nice day!")
+            response=requests.post( 
+                "https://chatbot-do41.onrender.com",
+                json={"message": "Goodbye! Have a nice day!"}
+             )
+            if response.status_code == 200:
+                return response.json()["response"]
+            else:
+                return "Sorry,something went wrong."
         elif any(help_intent in user_input.lower() for help_intent in help_intents):
-            return generate_hugging_face_response("I can chat with you in simple conversations. You can ask me anything!")
+            response=requests.post(  
+                "https://chatbot-do41.onrender.com",
+                json={"message": "I can chat with you, translate words, calculate mathematical expressions, provide weather information, and share jokes. How can I help you?"}
+            )
+            if response.status_code == 200:
+                return response.json()["response"]
+            else:
+                return "Sorry,something went wrong."
         elif any(favourite in user_sentences for favourite in favorites):
-            return generate_hugging_face_response("I like to chat with you!")
+            response=requests.post( 
+                "https://chatbot-do41.onrender.com",
+                json={"message": "I like to chat with you!"}
+            )
+            if response.status_code == 200:
+                return response.json()["response"]
+            else:
+                return "Sorry,something went wrong."
         return "I'm not sure how to respond to that."
     
     except Exception as e:
