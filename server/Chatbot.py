@@ -269,7 +269,7 @@ def get_weather(city, day_offset):
             return "Are you sure you living in earth?"
     except  Exception as e:
         return "An error occurred while fetching weather data."
-    
+
 def generate_response(user_input):
     global context_memory
     try:
@@ -362,41 +362,13 @@ def generate_response(user_input):
         favorites = ["favourite", "love", "like"]
 
         if any(greeting in user_sentences for greeting in greetings):
-            response=requests.post(
-                "http://localhost:5000/api",
-                json={"message": "Hello! How can i assist you today?"}
-            )
-            if response.status_code == 200:
-                return response.json()["response"]
-            else:
-                return "Sorry,something went wrong."
+            return "Hello! How can I assist you today?"
         elif any(farewell in user_input.lower() for farewell in farewells):
-            response=requests.post( 
-                "http://localhost:5000/api",
-                json={"message": "Goodbye! Have a nice day!"}
-             )
-            if response.status_code == 200:
-                return response.json()["response"]
-            else:
-                return "Sorry,something went wrong."
+            return "Goodbye! Have a nice day!"
         elif any(help_intent in user_input.lower() for help_intent in help_intents):
-            response=requests.post(  
-                "http://localhost:5000/api",
-                json={"message": "I can chat with you, translate words, calculate mathematical expressions, provide weather information, and share jokes. How can I help you?"}
-            )
-            if response.status_code == 200:
-                return response.json()["response"]
-            else:
-                return "Sorry,something went wrong."
+            return "I can chat with you in simple conversations. You can ask me anything!"
         elif any(favourite in user_sentences for favourite in favorites):
-            response=requests.post( 
-                "http://localhost:5000/api",
-                json={"message": "I like to chat with you!"}
-            )
-            if response.status_code == 200:
-                return response.json()["response"]
-            else:
-                return "Sorry,something went wrong."
+            return"I like to chat with you!"
         return "I'm not sure how to respond to that."
     
     except Exception as e:

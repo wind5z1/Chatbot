@@ -3,29 +3,11 @@ from flask_cors import CORS
 from Chatbot import generate_response
 import nltk
 import os
-import requests
 
 # 確保 NLTK 需要的資源下載
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
-API_TOKEN = "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"
-API_URL = "https://api-inference.huggingface.co/models/distilgpt2"
-HEADERS={
-    "Authorization": f"Bearer {API_TOKEN}",
-    "Content-Type": "application/json"
-}
-def query_hugging_face(payload):
-    try:
-        response= requests.post(API_URL, headers=HEADERS, json=payload)
-        response.raise_for_status()
-        print("API Response:", response.json())
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error calling Hugging Face Api:{e}")
-        print("API Response Status Code:", response.status_code if 'response' in locals() else "No response")
-        print("API Response Content:", response.text if 'response' in locals() else "No response")
-        return None
-    
+
 # Flask 設定
 app = Flask(__name__, static_folder='../client', template_folder='../client')
 CORS(app)
@@ -47,18 +29,7 @@ def chat():
             return jsonify({'error': 'Invalid request'}), 400
 
         message = data.get('message', '')
-        payload={
-            "inputs":message,
-            "parameters":{
-                "max_length":100,
-                "num_return_sequences": 1
-            }
-        }
-        response= query_hugging_face(payload)
-        if response:
-            response_text = response[0]['generated_text']
-        else:
-            response_text = "Sorry,something went wrong."
+        response_text = generate_response(message)
         return jsonify({'response': response_text})
     
     except Exception as e:
