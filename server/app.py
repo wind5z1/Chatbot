@@ -47,7 +47,7 @@ def chat():
         payload={
             "inputs":message,
             "parameters":{
-                "max-length":100,
+                "max_length":100,
                 "num_return_sequences": 1
             }
         }
