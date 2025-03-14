@@ -21,7 +21,8 @@ context_memory = {
     "last_translation" : None,
     "last_definition" : None,
     "last_translation_lang" : None,
-    "user_name" : None
+    "user_name" : None,
+    "last_quote_requested" : False
 }
 operators = {
     "+" : op.add,
@@ -309,8 +310,14 @@ def generate_response(user_input):
             return get_news()
         
         if "quote" in user_input.lower():
+            context_memory["last_quote_requested"] = True
+            save_context()
             return get_quote()
-        
+        if context_memory["last_quote_requested"] and "next" in user_input.lower():
+            return get_quote()
+        context_memory["last_quote_requested"]=False
+        save_context()
+                
         if re.search(r"how about(.+)", user_input.lower()):
             new_query = re.search(r"how about(.+)", user_input.lower()).group(1).strip()
             if context_memory["last_translation"]:
