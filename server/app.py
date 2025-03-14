@@ -14,6 +14,15 @@ HEADERS={
     "Authorization": f"Bearer {API_TOKEN}",
     "Content-Type": "application/json"
 }
+def query_hugging_face(payload):
+    try:
+        response= requests.post(API_URL, headers=HEADERS, json=payload)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling Hugging Face Api:{e}")
+        return None
+    
 # Flask 設定
 app = Flask(__name__, static_folder='../client', template_folder='../client')
 CORS(app)
@@ -35,7 +44,18 @@ def chat():
             return jsonify({'error': 'Invalid request'}), 400
 
         message = data.get('message', '')
-        response_text = generate_response(message)
+        payload={
+            "inputs":message,
+            "parameters":{
+                "max-length":100,
+                "num_return_sequences": 1
+            }
+        }
+        response= query_hugging_face(payload)
+        if response:
+            response_text = response[0]['generated_text']
+        else:
+            response_text = "Sorry,something went wrong."
         return jsonify({'response': response_text})
     
     except Exception as e:
