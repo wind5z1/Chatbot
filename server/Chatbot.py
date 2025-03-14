@@ -83,7 +83,19 @@ def get_definition(word):
     else:
         # 如果 API 請求失敗
         return f"Sorry, I couldn't find the definition of the word '{word}'."
-    
+
+def get_quote():
+    url="https://api.quotable.io.random"
+    try:
+        response = requests.get(url)
+        if response.status_code==200:
+            data=response.json()
+            return f"Here is a quote for you:\n'{data['content']}' - {data['author']}"
+        else:
+            return f"Let me think what quote can i choose for you..."
+    except Exception as e:
+        return f"An error occured while fetching the quote: str{e}"
+
 def translate_text(text, target_language):
     try:
         if not text.strip():
@@ -293,6 +305,9 @@ def generate_response(user_input):
 
         if "news" in user_input.lower() or "headlines" in user_input.lower():
             return get_news()
+        
+        if "quote" in user_input.lower():
+            return get_quote()
         
         if re.search(r"how about(.+)", user_input.lower()):
             new_query = re.search(r"how about(.+)", user_input.lower()).group(1).strip()
