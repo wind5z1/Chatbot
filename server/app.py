@@ -18,9 +18,12 @@ def query_hugging_face(payload):
     try:
         response= requests.post(API_URL, headers=HEADERS, json=payload)
         response.raise_for_status()
+        print("API Response:", response.json())
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Error calling Hugging Face Api:{e}")
+        print("API Response Status Code:", response.status_code if 'response' in locals() else "No response")
+        print("API Response Content:", response.text if 'response' in locals() else "No response")
         return None
     
 # Flask 設定
