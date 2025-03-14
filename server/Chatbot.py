@@ -85,13 +85,13 @@ def get_definition(word):
         return f"Sorry, I couldn't find the definition of the word '{word}'."
 
 def get_quote():
-    url="https://api.quotable.io/random"
+    url="https://quotes.rest/qod"
     try:
         response = requests.get(url)
         if response.status_code==200:
             data=response.json()
-            quote=data.get("content", "No quote found.")
-            author=data.get("author", "Unknown")
+            quote=data.get("contents", {}).get("quotes",[{}])[0].get("quote","No quote found.")
+            author=data.get("contents",{}).get("quotes",[{}])[0].get("author","Unknown")
             return f"Here's a quote for you:\n\n\"{quote}\"\n- {author}"
         else:
             return f"Let me think what quote can i choose for you..."
