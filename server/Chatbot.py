@@ -363,7 +363,7 @@ def generate_response(user_input):
 
         if any(greeting in user_sentences for greeting in greetings):
             response=requests.post(
-                "https://chatbot-do41.onrender.com",
+                "http://localhost:5000/api",
                 json={"message": "Hello! How can i assist you today?"}
             )
             if response.status_code == 200:
@@ -372,7 +372,7 @@ def generate_response(user_input):
                 return "Sorry,something went wrong."
         elif any(farewell in user_input.lower() for farewell in farewells):
             response=requests.post( 
-                "https://chatbot-do41.onrender.com",
+                "http://localhost:5000/api",
                 json={"message": "Goodbye! Have a nice day!"}
              )
             if response.status_code == 200:
@@ -381,7 +381,7 @@ def generate_response(user_input):
                 return "Sorry,something went wrong."
         elif any(help_intent in user_input.lower() for help_intent in help_intents):
             response=requests.post(  
-                "https://chatbot-do41.onrender.com",
+                "http://localhost:5000/api",
                 json={"message": "I can chat with you, translate words, calculate mathematical expressions, provide weather information, and share jokes. How can I help you?"}
             )
             if response.status_code == 200:
@@ -390,7 +390,7 @@ def generate_response(user_input):
                 return "Sorry,something went wrong."
         elif any(favourite in user_sentences for favourite in favorites):
             response=requests.post( 
-                "https://chatbot-do41.onrender.com",
+                "http://localhost:5000/api",
                 json={"message": "I like to chat with you!"}
             )
             if response.status_code == 200:
