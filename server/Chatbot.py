@@ -90,7 +90,9 @@ def get_quote():
         response = requests.get(url)
         if response.status_code==200:
             data=response.json()
-            return f"Here is a quote for you:\n'{data['content']}' - {data['author']}"
+            quote=data.get("content", "No quote found.")
+            author=data.get("author", "Unknown")
+            return f"Here's a quote for you:\n\n\"{quote}\"\n- {author}"
         else:
             return f"Let me think what quote can i choose for you..."
     except Exception as e:
