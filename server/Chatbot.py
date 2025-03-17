@@ -109,6 +109,7 @@ def generate_response(user_input):
                 text, lang = match.groups()
                 context_memory["last_translation"] = text.strip()
                 context_memory["last_translation_lang"] = lang.strip()
+                context_memory["last_defination"] = None
                 save_context()
                 return translate_text(text.strip(), lang.strip())
             
@@ -116,6 +117,7 @@ def generate_response(user_input):
         if define_match:
             word = define_match.group(1)
             context_memory["last_defination"] = word
+            context_memory["last_translation"] = None
             save_context()
             return get_definition(word)
 
