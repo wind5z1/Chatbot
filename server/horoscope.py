@@ -1,6 +1,6 @@
 import requests
 
-def get_horoscope(zodiac_sign):
+def get_horoscope(zodiac_sign, day="today"):
     url=f"https://aztro.sameerkumar.website?sign={zodiac_sign}&day={day}"
     response = requests.get(url)
     if response.status_code == 200:
