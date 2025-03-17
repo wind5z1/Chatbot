@@ -125,7 +125,12 @@ def generate_response(user_input):
         save_context()  # 存檔
 
         if "horoscope" in user_input.lower():
-            return get_horoscope(user_input)
+            zordiac_sign_match = re.search(r"horoscope for(\w+)", user_input.lower())
+            if zordiac_sign_match:
+                zordiac_sign = zordiac_sign_match.group(1).lower()
+                return get_horoscope(zordiac_sign)
+            else:
+                return "Please tell me your zordiac sign to get the horoscope."
 
         if "my name is" in user_input.lower():
             name_match = re.search(r"my name is (\w+)", user_input.lower())
