@@ -13,6 +13,7 @@ from utils import preprocess_text
 from times import get_time_info
 from calculation import calculate_expression
 from fact import get_random_fact
+from horoscope import get_horoscope
 
 nlp = spacy.load("en_core_web_sm")
 spell = SpellChecker()
@@ -122,6 +123,10 @@ def generate_response(user_input):
             return get_joke()
         context_memory["last_joke_requested"] = False
         save_context()  # 存檔
+
+        if "horoscope" in user_input.lower():
+            return get_horoscope(user_input)
+
         if "my name is" in user_input.lower():
             name_match = re.search(r"my name is (\w+)", user_input.lower())
             if name_match:
