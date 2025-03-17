@@ -2,7 +2,7 @@ import requests
 
 def get_horoscope(zodiac_sign, day="today"):
     url=f"https://aztro.sameerkumar.website?sign={zodiac_sign}&day={day}"
-    response = requests.get(url)
+    response = requests.post(url)
     if response.status_code == 200:
         horoscope_data = response.json()
         return horoscope_data["description"]
