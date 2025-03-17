@@ -12,7 +12,7 @@ from definition import get_definition
 from quotes import get_quote
 from utils import correct_spelling
 from utils import preprocess_text
-from time import get_time_info
+from times import get_time_info
 
 nlp = spacy.load("en_core_web_sm")
 spell = SpellChecker()
