@@ -12,6 +12,7 @@ from utils import correct_spelling
 from utils import preprocess_text
 from times import get_time_info
 from calculation import calculate_expression
+from fact import get_random_fact
 
 nlp = spacy.load("en_core_web_sm")
 spell = SpellChecker()
@@ -56,7 +57,10 @@ def generate_response(user_input):
             return get_quote()
         context_memory["last_quote_requested"]=False
         save_context()
-                
+        
+        if "random fact" in user_input.lower() or "fact" in user_input.lower():
+            return get_random_fact()
+        
         if re.search(r"how about(.+)", user_input.lower()):
             new_query = re.search(r"how about(.+)", user_input.lower()).group(1).strip()
             if context_memory["last_translation"]:
