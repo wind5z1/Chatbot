@@ -1,20 +1,18 @@
 import subprocess
 import json
-import contractions
-import spacy
 import platform
-import requests
 import re
 import math
 import operator as op
-import datetime
-import pytz
-from deep_translator import GoogleTranslator
-from spellchecker import SpellChecker
-
-# 下載 NLTK 必需的資料
-nlp = spacy.load("en_core_web_sm")
-spell = SpellChecker()
+from translation import translate_text
+from weather import get_weather
+from news import get_news
+from joke import get_joke
+from definition import get_definition
+from quotes import get_quote
+from utils import correct_spelling
+from utils import preprocess_text
+from time import get_time_info
 
 context_memory = {
     "last_joke_requested" : False,
@@ -53,142 +51,6 @@ def load_context():
         pass 
 load_context()   
 
-def correct_spelling(text):
-    words = text.split()
-    corrected_words = []
-    for word in words:
-        corrected_word = spell.correction(word)
-        corrected_words.append(corrected_word)
-    return ' '.join(corrected_words)
-
-def preprocess_text(text):
-    text = contractions.fix(text)
-    doc = nlp(text.lower())
-
-    tokens = [token.text for token in doc if not token.is_stop and token.is_alpha]
-    return tokens
-
-def get_definition(word):
-    url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        try:
-            data = response.json()
-            # 正確的 JSON 解析路徑
-            definition = data[0]['meanings'][0]['definitions'][0]['definition']
-            return f"Definition of '{word}': {definition}"
-        except (KeyError, IndexError) as e:
-            # 如果 JSON 結構不匹配或缺少字段
-            return f"Sorry, I couldn't find the definition of the word '{word}'."
-    else:
-        # 如果 API 請求失敗
-        return f"Sorry, I couldn't find the definition of the word '{word}'."
-
-def get_quote():
-    url="https://zenquotes.io/api/random"
-    try:
-        response = requests.get(url)
-        if response.status_code==200:
-            data=response.json()
-            quote = data[0].get("q", "No quote found.")
-            author = data[0].get("a", "Unknown")
-            return f"Here's a quote for you:\n\n\"{quote}\"\n- {author}"
-        else:
-            return f"Let me think what quote can i choose for you..."
-    except Exception as e:
-        return f"An error occured while fetching the quote: str(e)"
-
-def translate_text(text, target_language):
-    try:
-        if not text.strip():
-            return "Please provide text to translate."
-        
-        language_map = {
-            "chinese" : "zh-CN",
-            "english" : "en",
-            "french" : "fr",
-            "german" : "de",
-            "italian" : "it",
-            "japanese" : "ja",
-            "korean" : "ko",
-            "spanish" : "es"
-        }
-        target_language = language_map.get(target_language.lower(), target_language)
-        translated = GoogleTranslator(source='auto', target=target_language).translate(text)
-        if translated:
-            return f"{translated}"
-        else:
-            return "Translation failed. Please try again."
-    except Exception as e:
-        return f"An error occurred during translation: {str(e)}"
-    
-def get_time_info(user_input):
-    doc = nlp(user_input.lower())
-
-    # 檢查是否提到 "time" 或 "date"
-    if "time" in user_input.lower() or "date" in user_input.lower():
-        # 嘗試從句子中找出地點（GPE = 地理位置實體）
-        locations = [ent.text.lower() for ent in doc.ents if ent.label_ == "GPE"]
-
-        # 城市對應的時區
-        timezone_map = {
-            "new york": "America/New_York",
-            "london": "Europe/London",
-            "paris": "Europe/Paris",
-            "tokyo": "Asia/Tokyo",
-            "beijing": "Asia/Shanghai",
-            "hong kong": "Asia/Hong_Kong",
-            "taipei": "Asia/Taipei",
-            "sydney": "Australia/Sydney",
-            "los angeles": "America/Los_Angeles",
-            "malaysia": "Asia/Kuala_Lumpur",
-            "singapore": "Asia/Singapore",
-            "korea": "Asia/Seoul"
-        }
-
-        # 國家對應的主要城市
-        country_timezone_map = {
-            "japan": "tokyo",
-            "china": "beijing",
-            "usa": "new york",
-            "america": "new york",
-            "australia": "sydney",
-            "uk": "london",
-            "united kingdom": "london",
-            "france": "paris",
-            "taiwan": "taipei",
-            "singapore": "singapore",
-            "malaysia": "malaysia",
-            "korea": "korea"
-        }
-
-        if locations:
-            location = locations[0]
-
-            # 如果輸入的是國家名稱，轉換為城市名稱
-            if location in country_timezone_map:
-                location = country_timezone_map[location]
-
-            # 檢查城市是否在時區對應表內
-            if location in timezone_map:
-                tz = pytz.timezone(timezone_map[location])
-                now = datetime.datetime.now(tz)
-                if "time" in user_input.lower():
-                    return f"The current time in {location.title()} is {now.strftime('%H:%M:%S')}."
-                elif "date" in user_input.lower():
-                    return f"The current date in {location.title()} is {now.strftime('%Y-%m-%d')}."
-            else:
-                return "Sorry, I don't know the timezone for that location. Please try another city."
-        
-        # 如果沒有提供地點，就返回 UTC 時間
-        now = datetime.datetime.utcnow()
-        if "time" in user_input.lower():
-            return f"The current UTC time is {now.strftime('%H:%M:%S')}."
-        elif "date" in user_input.lower():
-            return f"The current UTC date is {now.strftime('%Y-%m-%d')}."
-    
-    return None  # 如果沒有符合的條件，返回 None
 def check_for_app_command(user_input):
     doc = nlp(user_input.lower())
     for token in doc:
@@ -237,66 +99,6 @@ def calculate_expression(expression):
         return "Error: Division by zero."
     except Exception as e:
         return f"Error calculating expression: {str(e)}"
-
-def get_joke():
-    try:
-        url = "https://api.chucknorris.io/jokes/random"
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            return data["value"]
-        else:
-            return "I didn't have any jokes at this moment.Let me think a bit..."
-    except Exception as e:
-        return "An error occurred while fetching a joke."
-def get_news():
-    api_key="1087b5b718d54d5293369d275c13d2d8"
-    url=f"https://newsapi.org/v2/top-headlines?country=us&apiKey={api_key}"
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            articles=response.json().get("articles", [])
-            news_list=[f"{article['title']}:{article['description']}"for article in articles]
-            return "Here are the latest news headlines in us:\n" + "\n".join(news_list)
-        else:
-            return "I didn't have any news at this moment.Let me think a bit..."
-    except Exception as e:
-        return f"An error occurred while fetching news."
-def get_weather(city, day_offset):
-    api_key = "5dac3b051c407fc1fcc3b4d8e6043446"
-    if day_offset == 0:
-        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}"
-    else:
-        url = f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}"
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            if day_offset == 0:
-                temperature_kelvin = data["main"]["temp"]
-                temperature_celsius = temperature_kelvin - 273.15
-                weather_description = data["weather"][0]["description"]
-                return f"The temperature in {city} is {weather_description} with a temperature of {temperature_celsius:.1f}°C."
-            else:
-                today = datetime.datetime.now(datetime.timezone.utc).date()
-                target_date = today + datetime.timedelta(days=day_offset)
-                weather_list =  data["list"]
-                target_forecasts = [
-                    entry for entry in weather_list
-                    if datetime.datetime.fromtimestamp(entry["dt"], tz=datetime.timezone.utc).date()==target_date
-                ]
-                if not target_forecasts:
-                    return f"Sorry,i couldn't find the weather for {city} on {target_date}."
-                avg_temp = sum(entry["main"]["temp"] for entry in target_forecasts)/len(target_forecasts)
-                avg_temp_celsius = avg_temp - 273.15
-                weather_description = [entry["weather"][0]["description"] for entry in target_forecasts]
-                most_common_weather = max(set(weather_description), key=weather_description.count)
-                return f"The weather in {city} on {target_date} is expected to be '{most_common_weather}'"
-        else:
-            return "Are you sure you living in earth?"
-    except  Exception as e:
-        return "An error occurred while fetching weather data."
 
 def generate_response(user_input):
     global context_memory
