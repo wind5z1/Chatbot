@@ -1,6 +1,6 @@
-import subprocess
+import spacy
+from spellchecker import SpellChecker
 import json
-import platform
 import re
 import math
 import operator as op
@@ -13,6 +13,9 @@ from quotes import get_quote
 from utils import correct_spelling
 from utils import preprocess_text
 from time import get_time_info
+
+nlp = spacy.load("en_core_web_sm")
+spell = SpellChecker()
 
 context_memory = {
     "last_joke_requested" : False,
@@ -50,34 +53,6 @@ def load_context():
     except FileNotFoundError:
         pass 
 load_context()   
-
-def check_for_app_command(user_input):
-    doc = nlp(user_input.lower())
-    for token in doc:
-        if token.pos_ == 'NOUN' and token.text in ['calculator', 'notepad']:  # ✅ 修正
-            return token.text
-    return None
-
-def open_app(app_name):
-    system = platform.system()
-    
-    if system == "Windows":
-        if app_name == "calculator":
-            subprocess.run(["calc"], shell=True)
-        elif app_name == "notepad":
-            subprocess.run(["notepad"], shell=True)
-    elif system == "Darwin":  # macOS
-        if app_name == "calculator":
-            subprocess.run(["open", "-a", "Calculator"])
-        elif app_name == "notepad":
-            subprocess.run(["open", "-a", "TextEdit"])
-    elif system == "Linux":
-        if app_name == "calculator":
-            subprocess.run(["gnome-calculator"])
-        elif app_name == "notepad":
-            subprocess.run(["gedit"])
-    else:
-        print(f"Unsupported OS: {system}")
 
 def calculate_expression(expression):
     try:
@@ -143,11 +118,6 @@ def generate_response(user_input):
             context_memory["last_defination"] = word
             save_context()
             return get_definition(word)
-        
-        app_command = check_for_app_command(user_input)
-        if app_command:
-            open_app(app_command)
-            return f"Opening {app_command}..."
 
         if any(char in user_input for char in "0123456789+-*/^%") or \
             any(func in user_input.lower() for func in ["sqrt", "sin", "cos", "tan", "log"]):
