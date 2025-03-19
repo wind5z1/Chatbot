@@ -1,6 +1,6 @@
 import requests
 
-def get_horoscope(sign):
+def get_horoscope():
     url = "https://json.freeastrologyapi.com/western/planets"
 
 # API 密鑰（這裡需要你自己的密鑰）
