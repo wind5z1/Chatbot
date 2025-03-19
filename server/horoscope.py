@@ -7,6 +7,9 @@ def get_horoscope(sign):
     }
     response = requests.get(url, headers=headers)
 
+    print(f"Status Code: {response.status_code}")  # 打印 HTTP 状态码
+    print(f"Response Text: {response.text}")  # 打印 API 返回的文本内容
+
     if response.status_code == 200:
         horoscope_data = response.json()
         return horoscope_data.get("horoscope","No horoscope information found.")
