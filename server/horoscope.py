@@ -1,9 +1,11 @@
 import requests
 
 def get_horoscope(sign):
-    api_key="wdfR4kswJ07sTVhmDtrHS5MckXZQYHzg4eUA0Xeu"
-    url=f"https://json.freeastrologyapi.com/western/houses/{sign}/daily?apikey={api_key}"
-    response = requests.get(url)
+    url=f"https://json.freeastrologyapi.com/horoscope/{sign}/daily"
+    headers = {
+        "Authorization": "Bearer wdfR4kswJ07sTVhmDtrHS5MckXZQYHzg4eUA0Xeu"
+    }
+    response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
         horoscope_data = response.json()
