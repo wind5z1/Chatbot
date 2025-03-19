@@ -128,8 +128,8 @@ def generate_response(user_input):
             user_input = user_input.strip().lower()  # 清理輸入
             print(f"Debug: User input = {user_input}")  # 打印用戶輸入
 
-        # 使用正則表達式匹配星座名稱
-            match = re.search(r"horoscope\s+for\s+(\w+)", user_input)
+            # 使用正則表達式匹配星座名稱，支持空格和大小寫
+            match = re.search(r"horoscope\s+for\s+([a-zA-Z\s]+)", user_input)
             if match:
                 sign = match.group(1).strip().lower()
                 print(f"Debug: Matched sign = {sign}")  # 打印匹配到的星座

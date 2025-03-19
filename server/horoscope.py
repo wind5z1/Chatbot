@@ -1,19 +1,23 @@
 import requests
 
 def get_horoscope(sign):
-    url = "https://json.freeastrologyapi.com/western/planets" # 請確保這是正確的端點
+    url = "https://json.freeastrologyapi.com/western/planets"
+
+# API 密鑰（這裡需要你自己的密鑰）
+    api_key = "wdfR4kswJ07sTVhmDtrHS5MckXZQYHzg4eUA0Xeu"
+
+# 添加 API 密鑰到請求頭部（如果 API 需要這樣）
     headers = {
-        "Content-Type": "application/json",
-        "x-api-key": "wdfR4kswJ07sTVhmDtrHS5MckXZQYHzg4eUA0Xeu"  # 替換為你的 API 密鑰
-    }
-    # 在 POST 請求中發送星座信息（例如："aries", "leo"）
-    data = {
-        "sign": sign  # 這裡 "sign" 是你想查詢的星座
+        "Authorization": f"Bearer {api_key}"
     }
 
-    response = requests.post(url, headers=headers, json=data)
-    
+# 發送 GET 請求
+    response = requests.get(url, headers=headers)
+
+# 檢查響應狀態
     if response.status_code == 200:
-        return response.json()  # 返回 JSON 格式的運勢資料
+        # 解析並顯示返回的 JSON 數據
+        data = response.json()
+        print(data)
     else:
-        return f"Failed to fetch horoscope. Status code: {response.status_code}"
+        print(f"Error: {response.status_code}, {response.text}")
