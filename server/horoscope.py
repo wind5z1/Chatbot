@@ -2,7 +2,7 @@ import requests
 
 def get_horoscope(sign):
     api_key="wdfR4kswJ07sTVhmDtrHS5MckXZQYHzg4eUA0Xeu"
-    url=f"https://freeastrologyapi.com/api/horoscope/{sign}/daily?apikey={api_key}"
+    url=f"https://json.freeastrologyapi.com/western/houses/{sign}/daily?apikey={api_key}"
     response = requests.get(url)
 
     if response.status_code == 200:
