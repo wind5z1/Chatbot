@@ -1,10 +1,10 @@
 import requests
 
-def get_horoscope(sign):
+def get_horoscope():
+    sign = "aries"
     url=f"https://json.freeastrologyapi.com/horoscope/{sign}/daily"
     headers = {
         "Authorization": "Bearer wdfR4kswJ07sTVhmDtrHS5MckXZQYHzg4eUA0Xeu",
-        "Content-Type": "application/json"
     }
     response = requests.get(url, headers=headers)
 
