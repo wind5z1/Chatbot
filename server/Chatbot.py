@@ -125,10 +125,10 @@ def generate_response(user_input):
         save_context()  # 存檔
 
         if "horoscope" in user_input.lower():
-            zordiac_sign_match = re.search(r"horoscope for(\w+)", user_input.lower())
-            if zordiac_sign_match:
-                zordiac_sign = zordiac_sign_match.group(1).lower()
-                return get_horoscope(zordiac_sign)
+            match = re.search(r"\b(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)\b", user_input.lower())
+            if match:
+                sign = match.group(1)
+                return get_horoscope(sign)
             else:
                 return "Please tell me your zordiac sign to get the horoscope."
 
