@@ -125,7 +125,7 @@ def generate_response(user_input):
         save_context()  # 存檔
 
         if "horoscope" in user_input.lower():
-            match=re.search(r"horoscope\s+(\w+)",user_input.lower())
+            match=re.search(r"horoscope for (\w+)",user_input.lower())
             if match:
                 sign=match.group(1).strip().lower()
                 return get_horoscope(sign)
