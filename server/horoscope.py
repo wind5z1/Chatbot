@@ -1,7 +1,7 @@
 import requests
 
 def get_horoscope(sign):
-    url = "https://json.freeastrologyapi.com/horoscope/daily"  # 請確保這是正確的端點
+    url = "https://json.freeastrologyapi.com/western/planets" # 請確保這是正確的端點
     headers = {
         "Content-Type": "application/json",
         "x-api-key": "wdfR4kswJ07sTVhmDtrHS5MckXZQYHzg4eUA0Xeu"  # 替換為你的 API 密鑰
