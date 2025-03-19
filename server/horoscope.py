@@ -1,18 +1,14 @@
 import requests
 
-def get_horoscope():
-    sign = "aries"
-    url=f"https://json.freeastrologyapi.com/horoscope/{sign}/daily"
+def get_horoscope(sign):
+    url = "https://best-daily-astrology-and-horoscope-api.p.rapidapi.com/api/Detailed-Horoscope/?zodiacSign={sign}"
     headers = {
-        "Authorization": "Bearer wdfR4kswJ07sTVhmDtrHS5MckXZQYHzg4eUA0Xeu",
+        "X-RapidAPI-Key": "0bde6d52ccmsh7e12e7c52ee3d68p119f1djsn84b655af5bb6",  # 替換為你的 RapidAPI 密鑰
+        "X-RapidAPI-Host": "best-daily-astrology-and-horoscope-api.p.rapidapi.com"
     }
     response = requests.get(url, headers=headers)
-
-    print(f"Status Code: {response.status_code}")  # 打印 HTTP 状态码
-    print(f"Response Text: {response.text}")  # 打印 API 返回的文本内容
-
+    
     if response.status_code == 200:
-        horoscope_data = response.json()
-        return horoscope_data.get("horoscope","No horoscope information found.")
+        return response.json()
     else:
-        return "I didn't have any horoscope imformation at this moment.Let me think a bit..."
+        return "Failed to fetch horoscope."

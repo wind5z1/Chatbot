@@ -125,8 +125,25 @@ def generate_response(user_input):
         save_context()  # 存檔
 
         if "horoscope" in user_input.lower():
-            sign="aries"
-            return get_horoscope(sign)
+            user_input = user_input.strip().lower()  # 清理輸入
+            print(f"Debug: User input = {user_input}")  # 打印用戶輸入
+
+        # 使用正則表達式匹配星座名稱
+            match = re.search(r"horoscope\s+for\s+(\w+)", user_input)
+            if match:
+                sign = match.group(1).strip().lower()
+                print(f"Debug: Matched sign = {sign}")  # 打印匹配到的星座
+
+            # 檢查星座名稱是否有效
+                valid_signs = {"aries", "taurus", "gemini", "cancer", "leo", "virgo", 
+                                "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"}
+                if sign in valid_signs:
+                    return get_horoscope(sign)
+                else:
+                    return "Please provide a valid zodiac sign."
+            else:
+                print("Debug: No match found")  # 打印未匹配到的信息
+                return "Please tell me your zodiac sign to get the horoscope."
         
         if "my name is" in user_input.lower():
             name_match = re.search(r"my name is (\w+)", user_input.lower())
