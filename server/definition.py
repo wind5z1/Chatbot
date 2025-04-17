@@ -1,18 +1,24 @@
 import requests
 
+# 単語の定義を取得する関数
 def get_definition(word):
+    # 辞書APIのURL（指定した単語の定義を取得）
     url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+    
+    # GETリクエストを送信
     response = requests.get(url)
 
+    # ステータスコードが200（成功）の場合
     if response.status_code == 200:
         try:
+            # JSONデータを取得し、定義を抽出
             data = response.json()
-            # 正確的 JSON 解析路徑
+            # 正しいJSON解析パス
             definition = data[0]['meanings'][0]['definitions'][0]['definition']
-            return f"Definition of '{word}': {definition}"
+            return f"'{word}' の定義: {definition}"
         except (KeyError, IndexError) as e:
-            # 如果 JSON 結構不匹配或缺少字段
-            return f"Sorry, I couldn't find the definition of the word '{word}'."
+            # JSON構造が一致しない、または必要なフィールドが欠けている場合
+            return f"申し訳ありませんが、単語 '{word}' の定義は見つかりませんでした。"
     else:
-        # 如果 API 請求失敗
-        return f"Sorry, I couldn't find the definition of the word '{word}'."
+        # APIリクエストが失敗した場合
+        return f"申し訳ありませんが、単語 '{word}' の定義は見つかりませんでした。"

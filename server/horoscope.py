@@ -1,23 +1,23 @@
 import requests
-
+# 占星情報を取得する関数（星座を引数として受け取る）
 def get_horoscope(sign):
     url = "https://json.freeastrologyapi.com/western/planets"
 
-# API 密鑰（這裡需要你自己的密鑰）
+    # APIキー
     api_key = "wdfR4kswJ07sTVhmDtrHS5MckXZQYHzg4eUA0Xeu"
 
-# 添加 API 密鑰到請求頭部（如果 API 需要這樣）
+    # リクエストヘッダーにAPIキーを追加
     headers = {
         "Authorization": f"Bearer {api_key}"
     }
 
-# 發送 GET 請求
+    # GETリクエストを送信
     response = requests.get(url, headers=headers)
 
-# 檢查響應狀態
+    # レスポンスのステータスを確認
     if response.status_code == 200:
-        # 解析並顯示返回的 JSON 數據
+        # JSONデータを解析して表示
         data = response.json()
         print(data)
     else:
-        print(f"Error: {response.status_code}, {response.text}")
+        print(f"エラー: {response.status_code}, {response.text}")

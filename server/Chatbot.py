@@ -2,6 +2,8 @@ import spacy
 import json
 import re
 from spellchecker import SpellChecker
+
+# 各種機能のモジュールをインポート
 from translation import translate_text
 from weather import get_weather
 from news import get_news
@@ -15,9 +17,13 @@ from calculation import calculate_expression
 from fact import get_random_fact
 from horoscope import get_horoscope
 
+# SpaCyの英語モデルを読み込む
 nlp = spacy.load("en_core_web_sm")
+
+# スペルチェッカーの初期化
 spell = SpellChecker()
 
+# 会話履歴などのコンテキストを記憶するための辞書
 context_memory = {
     "last_joke_requested" : False,
     "last_translation" : None,
@@ -27,49 +33,63 @@ context_memory = {
     "last_quote_requested" : False
 }
 
+# コンテキストをファイルに保存する関数
 def save_context():
     with open("context_memory.json", "w") as f:
         json.dump(context_memory, f)
+
+# コンテキストをファイルから読み込む関数
 def load_context():
     global context_memory
     try:
         with open("context_memory.json", "r") as f:
-            context_memory =json.load(f)
+            context_memory = json.load(f)
     except FileNotFoundError:
         pass 
-load_context()   
 
+# 起動時にコンテキスト読み込み
+load_context()
+
+# チャットボットのメイン応答生成関数
 def generate_response(user_input):
     global context_memory
     try:
+        # スペル修正
         user_input = correct_spelling(user_input)
+
+        # 時間に関する応答処理
         time_response = get_time_info(user_input)
         if time_response:
             return time_response
 
+        # ニュース要求の処理
         if "news" in user_input.lower() or "headlines" in user_input.lower():
             return get_news()
         
+        # 名言の要求
         if "quote" in user_input.lower():
             context_memory["last_quote_requested"] = True
             save_context()
             return get_quote()
         if context_memory["last_quote_requested"] and "next" in user_input.lower():
             return get_quote()
-        context_memory["last_quote_requested"]=False
+        context_memory["last_quote_requested"] = False
         save_context()
-        
+
+        # ランダムな雑学の要求
         if "random fact" in user_input.lower() or "fact" in user_input.lower():
             return get_random_fact()
         
+        # 前の翻訳・定義に基づいて「how about〜」に対応
         if re.search(r"how about(.+)", user_input.lower()):
             new_query = re.search(r"how about(.+)", user_input.lower()).group(1).strip()
             if context_memory["last_translation"]:
-                return translate_text(new_query,context_memory["last_translation_lang"])
+                return translate_text(new_query, context_memory["last_translation_lang"])
             if context_memory["last_defination"]:
                 return get_definition(new_query)
             return "Could you clarify what you mean by 'how about'?"
         
+        # 翻訳要求の処理
         if "translate" in user_input.lower() and "to" in user_input.lower():
             match = re.search(r"translate (.+?) to (\w+)", user_input.lower())
             if match:
@@ -79,8 +99,9 @@ def generate_response(user_input):
                 context_memory["last_defination"] = None
                 save_context()
                 return translate_text(text.strip(), lang.strip())
-            
-        define_match = re.search(r"define\s+(\w+)",user_input.lower())
+        
+        # 単語の定義要求
+        define_match = re.search(r"define\s+(\w+)", user_input.lower())
         if define_match:
             word = define_match.group(1)
             context_memory["last_defination"] = word
@@ -88,22 +109,23 @@ def generate_response(user_input):
             save_context()
             return get_definition(word)
 
+        # 数学の計算要求
         if any(char in user_input for char in "0123456789+-*/^%") or \
             any(func in user_input.lower() for func in ["sqrt", "sin", "cos", "tan", "log"]):
-            # 移除非數學相關的詞語
             expression = re.sub(r'[^0-9+\-*/().% of]', '', user_input)
-            expression = expression.replace("of", "*")  # 將 "of" 轉換為 "*"
+            expression = expression.replace("of", "*")
             if expression:
                 return calculate_expression(expression)
             else:
                 return "Please provide a valid mathematical expression."
-        
-        weather_keyword =  ["weather", "temperature"]
+
+        # 天気予報の処理（都市名抽出 + 日付判断）
+        weather_keyword = ["weather", "temperature"]
         if any(keyword in user_input.lower() for keyword in weather_keyword):
             doc = nlp(user_input.lower())
             cities = [ent.text for ent in doc.ents if ent.label_ == "GPE"]
             day_offset = 0
-            if  "tomorrow" in user_input.lower():
+            if "tomorrow" in user_input.lower():
                 day_offset = 1
             elif "day after tomorrow" in user_input.lower():
                 day_offset = 2
@@ -113,7 +135,8 @@ def generate_response(user_input):
                 return weather_info
             else:
                 return "Please provide a city name."
-        
+
+        # ジョーク要求の処理
         joke_keywords = ["joke", "funny", "tell me a joke"]
         if any(keyword in user_input.lower() for keyword in joke_keywords):
             context_memory["last_joke_requested"] = True
@@ -122,29 +145,31 @@ def generate_response(user_input):
         if context_memory["last_joke_requested"] and "next" in user_input.lower():
             return get_joke()
         context_memory["last_joke_requested"] = False
-        save_context()  # 存檔
+        save_context()
 
+        # 星座占いの処理
         if "horoscope" in user_input.lower():
-            user_input = user_input.strip().lower()  # 清理輸入
-            print(f"Debug: User input = {user_input}")  # 打印用戶輸入
+            user_input = user_input.strip().lower()
+            print(f"Debug: User input = {user_input}")
 
-            # 使用正則表達式匹配星座名稱，支持空格和大小寫
             match = re.search(r"horoscope\s+for\s+([a-zA-Z\s]+)", user_input)
             if match:
                 sign = match.group(1).strip().lower()
-                print(f"Debug: Matched sign = {sign}")  # 打印匹配到的星座
+                print(f"Debug: Matched sign = {sign}")
 
-            # 檢查星座名稱是否有效
-                valid_signs = {"aries", "taurus", "gemini", "cancer", "leo", "virgo", 
-                                "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"}
+                valid_signs = {
+                    "aries", "taurus", "gemini", "cancer", "leo", "virgo", 
+                    "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"
+                }
                 if sign in valid_signs:
                     return get_horoscope(sign)
                 else:
                     return "Please provide a valid zodiac sign."
             else:
-                print("Debug: No match found")  # 打印未匹配到的信息
+                print("Debug: No match found")
                 return "Please tell me your zodiac sign to get the horoscope."
-        
+
+        # 名前登録・呼び出し機能
         if "my name is" in user_input.lower():
             name_match = re.search(r"my name is (\w+)", user_input.lower())
             if name_match:
@@ -155,7 +180,9 @@ def generate_response(user_input):
             if context_memory["user_name"]:
                 return f"Your name is {context_memory['user_name']}!"
             else:
-                return "I don't know your name yet.What's your name?"
+                return "I don't know your name yet. What's your name?"
+
+        # テキストを前処理して一般会話を解析
         tokens = preprocess_text(user_input)
         user_sentences = " ".join(tokens)
 
@@ -164,6 +191,7 @@ def generate_response(user_input):
         help_intents = ["help", "what can you do"]
         favorites = ["favourite", "love", "like"]
 
+        # 簡単な挨拶や感情表現に対応
         if any(greeting in user_sentences for greeting in greetings):
             return "Hello! How can I assist you today?"
         elif any(farewell in user_input.lower() for farewell in farewells):
@@ -171,9 +199,12 @@ def generate_response(user_input):
         elif any(help_intent in user_input.lower() for help_intent in help_intents):
             return "I can chat with you in simple conversations. You can ask me anything!"
         elif any(favourite in user_sentences for favourite in favorites):
-            return"I like to chat with you!"
+            return "I like to chat with you!"
+
+        # どの条件にも一致しない場合のデフォルト応答
         return "I'm not sure how to respond to that."
     
+    # エラー処理
     except Exception as e:
         import traceback
         print(f"Error in generate_response: {e}")

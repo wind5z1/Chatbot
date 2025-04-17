@@ -34,43 +34,48 @@
     <button onclick="sendMessage()">Send</button>
     
     <script>
-        // 確保前端和後端 API 路徑適用於本機 & 部署環境
+        // フロントエンドとバックエンドのAPIパスをローカルとデプロイ環境で適切に設定
         const API_BASE_URL = window.location.origin.includes("localhost") 
-            ? "http://localhost:5000" 
-            : window.location.origin;
+            ? "http://localhost:5000" // ローカル環境でのURL
+            : window.location.origin; // デプロイされた環境でのURL
 
         async function sendMessage() {
+            // ユーザーが入力したメッセージを取得
             const input = document.getElementById("input");
             const message = input.value.trim();
-            if (!message) return;
+            if (!message) return; // メッセージが空の場合は処理を終了
 
             const output = document.getElementById("chatOutput");
-            output.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+            output.innerHTML += `<p><strong>You:</strong> ${message}</p>`; // ユーザーのメッセージを表示
 
             try {
+                // APIにPOSTリクエストを送信
                 const response = await fetch(`${API_BASE_URL}/api`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message })
                 });
 
+                // レスポンスを受け取った後、ボットの返答を表示
                 const data = await response.json();
                 output.innerHTML += `<p><strong>Bot:</strong> ${data.response}</p>`;
             } catch (error) {
                 console.error(error);
-                output.innerHTML += `<p><strong>Bot:</strong> Sorry, something went wrong.</p>`;
+                output.innerHTML += `<p><strong>Bot:</strong> Sorry, something went wrong.</p>`; // エラーメッセージを表示
             }
 
-            input.value = ""; // 清空輸入框
-            input.focus(); // 聚焦輸入框
-            output.scrollTop = output.scrollHeight; // 滾動到底部
+            // 入力フィールドをクリアして再度フォーカスを設定
+            input.value = ""; 
+            input.focus(); 
+            // チャットの出力部分をスクロールして最新のメッセージを表示
+            output.scrollTop = output.scrollHeight; 
         }
 
-        // 按 Enter 送出訊息
+        // Enterキーが押されたときにメッセージを送信する
         document.getElementById("input").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
-                event.preventDefault();
-                sendMessage();
+                event.preventDefault(); // Enterのデフォルト動作をキャンセル
+                sendMessage(); // メッセージを送信
             }
         });
     </script>

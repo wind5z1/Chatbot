@@ -1,15 +1,33 @@
 import requests
+
+# 最新のニュースヘッドラインを取得する関数
 def get_news():
-    api_key="1087b5b718d54d5293369d275c13d2d8"
-    url=f"https://newsapi.org/v2/top-headlines?country=us&apiKey={api_key}"
+    # NewsAPI の API キー（ここでは US のニュースを取得）
+    api_key = "1087b5b718d54d5293369d275c13d2d8"
+    
+    # NewsAPI の URL（US のトップニュースを取得）
+    url = f"https://newsapi.org/v2/top-headlines?country=us&apiKey={api_key}"
+    
     try:
+        # GET リクエストを送信
         response = requests.get(url)
+        
+        # ステータスコードが 200（成功）の場合
         if response.status_code == 200:
+            # JSON データを取得
             data = response.json()
-            articles=response.json().get("articles", [])
-            news_list=[f"{article['title']}:{article['description']}"for article in articles]
-            return "Here are the latest news headlines in us:\n" + "\n".join(news_list)
+            
+            # 記事リストを取得
+            articles = response.json().get("articles", [])
+            
+            # 記事タイトルと説明をリストにまとめる
+            news_list = [f"{article['title']}:{article['description']}" for article in articles]
+            
+            # ニュースのヘッドラインを返す
+            return "こちらが最新のアメリカのニュースヘッドラインです:\n" + "\n".join(news_list)
         else:
-            return "I didn't have any news at this moment.Let me think a bit..."
+            # API リクエストが失敗した場合
+            return "今はニュースが見つかりませんでした…ちょっと考えさせて！"
     except Exception as e:
-        return f"An error occurred while fetching news."
+        # エラーが発生した場合
+        return f"ニュースを取得する際にエラーが発生しました。"
