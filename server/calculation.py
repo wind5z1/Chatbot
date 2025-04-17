@@ -36,16 +36,16 @@ def calculate_expression(expression):
 
         # 数式の形式が正しいかをチェック（英字や記号が許可されたものだけかどうか）
         if not re.match(r'^[\d+\-*/().% sqrt sincostanlog]+$', expression):
-            return "無効な式です。正しい数式を入力してください。"
+            return "Error: Invalid expression format."
 
         # eval 関数で式を評価（安全のためビルトイン関数は無効化）
         result = eval(expression, {"__builtins__": None}, {**operators, **math_functions})
-        return f"結果: {result}"
+        return f"Result: {result}"
     
     # 0 で割った場合のエラー処理
     except ZeroDivisionError:
-        return "エラー: 0 で割ることはできません。"
+        return "Error: Unable to divide by zero."
     
     # その他のエラー処理
     except Exception as e:
-        return f"計算中にエラーが発生しました: {str(e)}"
+        return f"Error in calculation: {str(e)}"

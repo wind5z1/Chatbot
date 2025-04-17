@@ -15,4 +15,4 @@ def get_random_fact():
         return fact_data["text"]
     else:
         # エラー時のメッセージを返す
-        return "今は面白い雑学が思いつかないよ…ちょっと考えさせて！"
+        return "I can't find any facts right now. Let me think about it..."

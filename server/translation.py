@@ -30,7 +30,7 @@ def translate_text(text, target_language):
             return f"{translated}"
         else:
             # 翻訳に失敗した場合のメッセージ
-            return "翻訳に失敗しました。もう一度試してください。"
+            return "The translation failed.Please try again later."
     except Exception as e:
         # エラーが発生した場合のエラーメッセージ
-        return f"翻訳中にエラーが発生しました: {str(e)}"
+        return f"An error occurred while translating: {str(e)}"

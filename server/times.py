@@ -60,19 +60,19 @@ def get_time_info(user_input):
                 
                 # "time" が含まれていれば、現在の時刻を返す
                 if "time" in user_input.lower():
-                    return f"{location.title()} の現在の時刻は {now.strftime('%H:%M:%S')} です。"
+                    return f"The time in {location.title()} now is {now.strftime('%H:%M:%S')}"
                 # "date" が含まれていれば、現在の日付を返す
                 elif "date" in user_input.lower():
-                    return f"{location.title()} の現在の日付は {now.strftime('%Y-%m-%d')} です。"
+                    return f"The date in{location.title()} today is {now.strftime('%Y-%m-%d')}"
             else:
                 # タイムゾーン情報が見つからない場合
-                return "申し訳ありませんが、その場所のタイムゾーンは分かりません。他の都市を試してみてください。"
+                return "The timezone information could not be found.Please try other locations."
         
         # 場所が提供されていない場合、UTC 時間を返す
         now = datetime.datetime.utcnow()
         if "time" in user_input.lower():
-            return f"現在の UTC 時刻は {now.strftime('%H:%M:%S')} です。"
+            return f"The current UTC time is {now.strftime('%H:%M:%S')}"
         elif "date" in user_input.lower():
-            return f"現在の UTC 日付は {now.strftime('%Y-%m-%d')} です。"
+            return f"The current UTC date is {now.strftime('%Y-%m-%d')}"
     
     return None  # 条件に一致しない場合は None を返す

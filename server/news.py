@@ -24,10 +24,10 @@ def get_news():
             news_list = [f"{article['title']}:{article['description']}" for article in articles]
             
             # ニュースのヘッドラインを返す
-            return "こちらが最新のアメリカのニュースヘッドラインです:\n" + "\n".join(news_list)
+            return "Here is the latest news:\n" + "\n".join(news_list)
         else:
             # API リクエストが失敗した場合
-            return "今はニュースが見つかりませんでした…ちょっと考えさせて！"
+            return "I can't find any news right now. Let me think about it..."
     except Exception as e:
         # エラーが発生した場合
-        return f"ニュースを取得する際にエラーが発生しました。"
+        return f"An error occurred while fetching news: {str(e)}"

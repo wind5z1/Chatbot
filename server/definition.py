@@ -18,7 +18,7 @@ def get_definition(word):
             return f"'{word}' の定義: {definition}"
         except (KeyError, IndexError) as e:
             # JSON構造が一致しない、または必要なフィールドが欠けている場合
-            return f"申し訳ありませんが、単語 '{word}' の定義は見つかりませんでした。"
+            return f"I'm sorry、The define of '{word}' is not found."
     else:
         # APIリクエストが失敗した場合
-        return f"申し訳ありませんが、単語 '{word}' の定義は見つかりませんでした。"
+        return f"I'm sorry、The define of word '{word}' is not found."

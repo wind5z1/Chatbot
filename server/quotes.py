@@ -15,14 +15,14 @@ def get_quote():
             data = response.json()
             
             # 名言と著者を抽出（デフォルト値を設定）
-            quote = data[0].get("q", "名言が見つかりませんでした。")
-            author = data[0].get("a", "不明")
+            quote = data[0].get("q", "Cannot find quote")
+            author = data[0].get("a", "Unknown author")
             
             # 名言をフォーマットして返す
-            return f"あなたへの名言です:\n\n\"{quote}\"\n- {author}"
+            return f"Your quote is:\n\n\"{quote}\"\n- {author}"
         else:
             # API リクエストが失敗した場合のメッセージ
-            return f"どの名言を選ぶか考え中です…"
+            return f"I'm thinking which quote matches you..."
     except Exception as e:
         # エラーが発生した場合のメッセージ
-        return f"名言を取得する際にエラーが発生しました: {str(e)}"
+        return f"There is a problem while fetching a quote: {str(e)}"

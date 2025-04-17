@@ -20,4 +20,4 @@ def get_horoscope(sign):
         data = response.json()
         print(data)
     else:
-        print(f"エラー: {response.status_code}, {response.text}")
+        print(f"error: {response.status_code}, {response.text}")

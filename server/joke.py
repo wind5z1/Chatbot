@@ -16,7 +16,7 @@ def get_joke():
             return data["value"]
         else:
             # APIリクエストが失敗した場合のメッセージ
-            return "今はジョークが思いつかないよ…ちょっと考えさせて！"
+            return "I can't find any jokes right now. Let me think about it..."
     except Exception as e:
         # エラーが発生した場合のメッセージ
-        return "ジョークを取得する際にエラーが発生しました。"
+        return "An error occurred while fetching a joke. Please try again later."
